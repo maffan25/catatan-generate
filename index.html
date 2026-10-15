@@ -6,11 +6,401 @@
 <title>Catatan Generator — ubah PDF jadi catatan yang rapi</title>
 <meta name="description" content="Unggah PDF, pilih model catatan, lalu edit dan unduh hasilnya sebagai PDF, Word, Markdown, HTML, atau teks.">
 <meta name="theme-color" content="#f5f1e8">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOSIgZmlsbD0iIzBkN2E1ZiIvPjxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xMCA4LjVoOGw0LjUgNC41djEwLjVhMSAxIDAgMCAxLTEgMWgtMTEuNWExIDEgMCAwIDEtMS0xdi0xNGExIDEgMCAwIDEgMS0xWiIvPjxwYXRoIGQ9Ik0xMyAxN2g2Ii8+PHBhdGggZD0iTTEzIDIwLjVoNCIvPjwvZz48L3N2Zz4K" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<style>
+/* =========================================================
+   Catatan Generator — gaya editorial hangat (kertas + tinta + zamrud)
+   ========================================================= */
+
+:root {
+  --bg: #f5f1e8;
+  --bg-2: #ece5d6;
+  --surface: #fffdf8;
+  --surface-2: #faf6ec;
+  --ink: #14213d;
+  --ink-2: #3a4560;
+  --muted: #6b7389;
+  --line: #e3dccb;
+  --line-2: #d3cab4;
+  --accent: #0d7a5f;
+  --accent-2: #0a5f4a;
+  --accent-soft: #dcf1e8;
+  --accent-ink: #ffffff;
+  --warn: #b45309;
+  --warn-soft: #fdecd2;
+  --danger: #b3261e;
+  --danger-soft: #fbe0dd;
+  --glow-1: rgba(13, 122, 95, 0.13);
+  --glow-2: rgba(214, 170, 90, 0.16);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow-1: 0 1px 2px rgba(20, 33, 61, 0.06), 0 4px 14px rgba(20, 33, 61, 0.06);
+  --shadow-2: 0 2px 4px rgba(20, 33, 61, 0.07), 0 18px 50px rgba(20, 33, 61, 0.14);
+  --f-ui: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --f-doc: 'Newsreader', Georgia, 'Times New Roman', serif;
+
+  /* warna kertas (tetap terang di mode gelap) */
+  --p-bg: #fffefa;
+  --p-ink: #1b1c22;
+  --p-muted: #5b6070;
+  --p-line: #ddd6c4;
+  --p-accent: #0d7a5f;
+}
+
+:root[data-theme='dark'] {
+  --bg: #0e1320;
+  --bg-2: #151c2d;
+  --surface: #171f31;
+  --surface-2: #1c2438;
+  --ink: #eaeef7;
+  --ink-2: #c3cadb;
+  --muted: #94a0b8;
+  --line: #263049;
+  --line-2: #33405f;
+  --accent: #3fd0a0;
+  --accent-2: #2fb98c;
+  --accent-soft: #12342b;
+  --accent-ink: #062b20;
+  --warn: #f0a85a;
+  --warn-soft: #3a2a14;
+  --danger: #ff8c82;
+  --danger-soft: #3d1b19;
+  --glow-1: rgba(63, 208, 160, 0.1);
+  --glow-2: rgba(214, 170, 90, 0.07);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.25);
+  --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.35), 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--f-ui);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+  background:
+    radial-gradient(1100px 480px at 88% -8%, var(--glow-1), transparent 60%),
+    radial-gradient(800px 420px at -8% 6%, var(--glow-2), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--accent-soft); color: var(--ink); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
+.plain { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+kbd { font: 600 11px var(--f-ui); background: var(--surface-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 1px 6px; }
+
+.ico { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ico-sm { width: 14px; height: 14px; }
+.ico-lg { width: 26px; height: 26px; }
+.ico-xl { width: 36px; height: 36px; }
+
+/* ---------- Topbar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 40;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: saturate(1.4) blur(12px);
+  -webkit-backdrop-filter: saturate(1.4) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-inner { max-width: 1280px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; }
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+.logo { width: 34px; height: 34px; border-radius: 10px; background: var(--accent); display: grid; place-items: center; box-shadow: 0 4px 12px rgba(13, 122, 95, 0.35); }
+.logo svg { width: 22px; height: 22px; }
+.brand-text { display: flex; align-items: baseline; gap: 6px; font-family: var(--f-display); font-size: 20px; line-height: 1; }
+.brand-text b { font-weight: 700; }
+.brand-text i { font-weight: 500; color: var(--muted); }
+.ico-sun { display: none; }
+:root[data-theme='dark'] .ico-sun { display: block; }
+:root[data-theme='dark'] .ico-moon { display: none; }
+
+/* ---------- Tombol ---------- */
+.icon-btn {
+  width: 38px; height: 38px; display: inline-grid; place-items: center;
+  background: transparent; border: 1px solid transparent; border-radius: 10px; color: var(--ink-2);
+  transition: background .15s, border-color .15s;
+}
+.icon-btn:hover { background: var(--surface-2); border-color: var(--line); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 40px; padding: 0 16px; border-radius: 12px; border: 1px solid transparent;
+  font-weight: 600; font-size: 14px; white-space: nowrap;
+  transition: transform .12s, background .15s, border-color .15s, box-shadow .15s, opacity .15s;
+}
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-block { width: 100%; height: 48px; font-size: 15px; }
+.btn-primary { background: var(--accent); color: var(--accent-ink); box-shadow: 0 6px 18px rgba(13, 122, 95, .28); }
+.btn-primary:hover:not(:disabled) { background: var(--accent-2); }
+.btn-solid { background: var(--ink); color: var(--bg); }
+.btn-solid:hover { opacity: .9; }
+.btn-ghost { background: var(--surface); border-color: var(--line); color: var(--ink-2); }
+.btn-ghost:hover { border-color: var(--line-2); background: var(--surface-2); }
+.btn-stop { background: var(--danger-soft); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 35%, transparent); }
+
+/* ---------- Hero ---------- */
+.app { max-width: 1280px; margin: 0 auto; padding: 0 20px 72px; }
+.hero { padding: 54px 0 34px; max-width: 820px; }
+.eyebrow { margin: 0 0 14px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.hero h1 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: clamp(32px, 5.4vw, 58px); line-height: 1.06; letter-spacing: -.02em; text-wrap: balance; }
+.hero h1 em { font-style: italic; font-weight: 500; color: var(--accent); }
+.lede { margin: 18px 0 0; max-width: 640px; font-size: 17px; color: var(--ink-2); }
+.hero-points { list-style: none; margin: 22px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.hero-points li { font-size: 13px; font-weight: 600; color: var(--ink-2); padding: 6px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; }
+.hero-points li::before { content: '✓'; color: var(--accent); margin-right: 6px; font-weight: 700; }
+
+/* ---------- Layout ---------- */
+.workspace { display: grid; grid-template-columns: minmax(340px, 410px) minmax(0, 1fr); gap: 28px; align-items: start; }
+.panel { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.stage { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-1); padding: 18px; }
+
+.step-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.step-num { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 13px; }
+.step-title { margin: 0; font-size: 15px; font-weight: 700; }
+
+/* ---------- Dropzone ---------- */
+.dropzone {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;
+  padding: 28px 16px; border: 1.5px dashed var(--line-2); border-radius: 14px; cursor: pointer;
+  color: var(--accent); background: var(--surface-2); transition: border-color .15s, background .15s, transform .15s;
+}
+.dropzone:hover, .dropzone:focus-within, .dropzone.is-drag { border-color: var(--accent); background: var(--accent-soft); }
+.dropzone.is-drag { transform: scale(1.01); }
+.dz-title { margin-top: 6px; font-weight: 700; color: var(--ink); }
+.dz-sub { font-size: 13px; color: var(--muted); }
+.dz-sub u { color: var(--accent); text-underline-offset: 3px; }
+
+.file-chip { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
+.file-ico { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); flex: none; }
+.file-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.file-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-meta { font-size: 12.5px; color: var(--muted); }
+.file-chip[data-state='loading'] .file-meta::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 6px; border: 2px solid var(--line-2); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -1px; }
+.file-chip[data-state='error'] .file-ico { background: var(--danger-soft); color: var(--danger); }
+.file-chip[data-state='error'] .file-meta { color: var(--danger); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Model ---------- */
+.model-list { display: flex; flex-direction: column; gap: 8px; }
+.model {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 11px 12px;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; transition: border-color .15s, background .15s, box-shadow .15s;
+}
+.model:hover:not(:disabled) { border-color: var(--line-2); }
+.model[aria-checked='true'] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent); }
+.model:disabled { opacity: .55; cursor: not-allowed; }
+.model-ico { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: var(--surface-2); color: var(--ink-2); flex: none; border: 1px solid var(--line); }
+.model[aria-checked='true'] .model-ico { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.model-body { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.model-name { font-weight: 700; font-size: 14.5px; }
+.model-tag { font-size: 12.5px; color: var(--muted); }
+.model-check { width: 22px; height: 22px; border-radius: 50%; display: none; place-items: center; background: var(--accent); color: var(--accent-ink); }
+.model-check .ico { width: 14px; height: 14px; stroke-width: 2.6; }
+.model[aria-checked='true'] .model-check { display: grid; }
+.badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--bg-2); color: var(--muted); }
+
+.model-detail { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line-2); font-size: 13.5px; color: var(--ink-2); }
+.model-detail p { margin: 0 0 10px; }
+.flow { display: flex; flex-wrap: wrap; gap: 6px 4px; align-items: center; }
+.flow-chip { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-2); }
+.flow-arrow { color: var(--line-2); font-size: 12px; }
+
+/* ---------- Form ---------- */
+.fields { display: flex; flex-direction: column; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.field-label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.field-label em { font-style: normal; font-weight: 500; color: var(--muted); margin-left: 4px; font-size: 12px; }
+.field input[type='text'], .field select, .field textarea {
+  width: 100%; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line-2); border-radius: 10px; transition: border-color .15s, box-shadow .15s;
+}
+.field textarea { resize: vertical; min-height: 72px; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; background: var(--bg-2); border-radius: 12px; }
+.seg-item { position: relative; }
+.seg-item input { position: absolute; opacity: 0; inset: 0; }
+.seg-item span { display: block; text-align: center; padding: 8px 6px; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--ink-2); cursor: pointer; transition: background .15s, color .15s; }
+.seg-item input:checked + span { background: var(--surface); color: var(--accent); box-shadow: var(--shadow-1); }
+.seg-item input:focus-visible + span { outline: 2px solid var(--accent); }
+
+.generate-bar { display: flex; flex-direction: column; gap: 8px; }
+.hint { margin: 0; text-align: center; font-size: 12.5px; color: var(--muted); }
+
+/* ---------- Stage ---------- */
+.stage-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.stage-title { display: flex; align-items: center; gap: 10px; }
+.stage-title h2 { margin: 0; font-family: var(--f-display); font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
+.stage-actions { display: flex; gap: 8px; align-items: center; }
+.pill { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--bg-2); color: var(--muted); }
+.pill[data-kind='writing'] { background: var(--warn-soft); color: var(--warn); }
+.pill[data-kind='writing']::after { content: ''; display: inline-block; width: 12px; text-align: left; animation: dots 1.2s steps(4, end) infinite; }
+.pill[data-kind='done'] { background: var(--accent-soft); color: var(--accent); }
+.pill[data-kind='error'] { background: var(--danger-soft); color: var(--danger); }
+@keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+
+.menu-wrap { position: relative; }
+.menu { position: absolute; right: 0; top: calc(100% + 8px); width: 290px; max-width: calc(100vw - 32px); padding: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-2); z-index: 50; }
+.menu-item { display: flex; flex-direction: column; align-items: flex-start; width: 100%; padding: 9px 12px; background: transparent; border: 0; border-radius: 10px; text-align: left; }
+.menu-item:hover, .menu-item:focus-visible { background: var(--accent-soft); }
+.menu-item b { font-size: 14px; }
+.menu-item small { font-size: 12px; color: var(--muted); }
+
+/* ---------- Final Check ---------- */
+.finalcheck { padding: 0; }
+.finalcheck > summary { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; list-style: none; }
+.finalcheck > summary::-webkit-details-marker { display: none; }
+.fc-title { font-family: var(--f-display); font-weight: 700; font-size: 17px; }
+.fc-summary { margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.fc-chevron { color: var(--muted); transition: transform .2s; }
+.finalcheck[open] .fc-chevron { transform: rotate(180deg); }
+.fc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 18px; }
+.fc-tile { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); min-width: 0; }
+.fc-tile > div, .fc-facts > div { display: flex; flex-direction: column; min-width: 0; }
+.fc-tile b { font-size: 13px; }
+.fc-note { font-size: 12px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
+.fc-facts { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; width: 100%; }
+.fc-facts input { position: absolute; opacity: 0; pointer-events: none; }
+.fc-dot { width: 18px; height: 18px; border-radius: 50%; flex: none; margin-top: 1px; border: 2px solid var(--line-2); background: var(--surface); display: grid; place-items: center; font-size: 11px; line-height: 1; font-weight: 800; color: #fff; }
+.fc-tile[data-state='ok'] { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: var(--accent-soft); }
+.fc-tile[data-state='ok'] .fc-dot { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.fc-tile[data-state='ok'] .fc-dot::before { content: '✓'; }
+.fc-tile[data-state='warn'] { border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); background: var(--warn-soft); }
+.fc-tile[data-state='warn'] .fc-dot { background: var(--warn); border-color: var(--warn); }
+.fc-tile[data-state='warn'] .fc-dot::before { content: '!'; }
+.fc-facts input:focus-visible + .fc-dot { outline: 2px solid var(--accent); outline-offset: 2px; }
+.fc-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 18px 0; }
+.chip { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: var(--surface); }
+.chip.is-ok { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+.chip.is-ok::before { content: '✓ '; }
+.chip.is-miss::before { content: '○ '; }
+.fc-stats { display: flex; flex-wrap: wrap; gap: 4px 18px; padding: 12px 18px 16px; font-size: 12.5px; color: var(--muted); }
+.fc-stats b { color: var(--ink); }
+
+/* ---------- Toolbar ---------- */
+.toolbar {
+  position: sticky; top: 58px; z-index: 20; display: flex; gap: 6px; padding: 6px; overflow-x: auto; scrollbar-width: none;
+  background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-1);
+}
+.toolbar::-webkit-scrollbar { display: none; }
+.tb-group { display: flex; gap: 2px; padding-right: 6px; margin-right: 2px; border-right: 1px solid var(--line); flex: none; }
+.tb-group:last-child { border-right: 0; margin-right: 0; padding-right: 0; }
+.toolbar button { min-width: 36px; height: 36px; padding: 0 8px; display: inline-grid; place-items: center; background: transparent; border: 0; border-radius: 9px; color: var(--ink-2); font-size: 13px; }
+.toolbar button:hover { background: var(--surface-2); }
+.toolbar button[aria-pressed='true'] { background: var(--accent-soft); color: var(--accent); }
+.toolbar button:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ---------- Kertas ---------- */
+.paper-wrap { position: relative; padding: 28px; border-radius: 20px; background: var(--bg-2); border: 1px solid var(--line); }
+:root[data-theme='dark'] .paper-wrap { background: #0a0f1a; }
+.paper {
+  position: relative; max-width: 794px; min-height: 900px; margin: 0 auto; padding: 72px 80px 80px;
+  background: var(--p-bg); color: var(--p-ink); border-radius: 4px; box-shadow: var(--shadow-2);
+  font-family: var(--f-doc); font-size: 17.5px; line-height: 1.75; outline: none; overflow-wrap: anywhere;
+}
+.paper-wrap:focus-within .paper { box-shadow: var(--shadow-2), 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.paper ::selection, .paper::selection { background: #cfeee2; color: #111; }
+.paper > :first-child { margin-top: 0; }
+.paper h1 { font-family: var(--f-display); font-weight: 700; font-size: 32px; line-height: 1.2; letter-spacing: -.015em; text-align: center; margin: 0 0 14px; text-wrap: balance; }
+.paper h1::after { content: ''; display: block; width: 72px; height: 3px; margin: 16px auto 0; border-radius: 2px; background: var(--p-accent); }
+.paper h1 + p, .paper h1 + p + p { text-align: center; margin: 0 0 4px; font-style: italic; font-size: 16px; color: var(--p-muted); }
+.paper h1 + p + p { margin-bottom: 8px; }
+.paper h2 { font-family: var(--f-ui); font-weight: 700; font-size: 13.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--p-accent); margin: 2.1em 0 .8em; padding-bottom: 7px; border-bottom: 1px solid var(--p-line); }
+.paper h3 { font-family: var(--f-display); font-weight: 700; font-size: 20px; line-height: 1.3; margin: 1.6em 0 .5em; }
+.paper p { margin: 0 0 1em; }
+.paper ul, .paper ol { margin: 0 0 1em; padding-left: 1.5em; }
+.paper li { margin: .25em 0; }
+.paper blockquote { margin: 1.2em 0; padding: .2em 0 .2em 1.1em; border-left: 3px solid var(--p-accent); color: var(--p-muted); font-style: italic; }
+.paper table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 15px; }
+.paper th, .paper td { border: 1px solid var(--p-line); padding: 6px 10px; text-align: left; }
+.paper th { background: #f4efe2; }
+.paper a { color: var(--p-accent); }
+.paper.is-writing > :last-child::after { content: ''; display: inline-block; width: 8px; height: 1.05em; margin-left: 3px; vertical-align: -3px; background: var(--p-accent); animation: blink 1s steps(2, start) infinite; }
+@keyframes blink { to { visibility: hidden; } }
+.paper[contenteditable='false'] { cursor: progress; }
+
+.empty-state { position: absolute; inset: 28px; display: none; pointer-events: none; padding: 72px 80px; max-width: 794px; margin: 0 auto; color: #8a8f9e; font-family: var(--f-ui); }
+.paper-wrap[data-empty='true'] .empty-state { display: block; }
+.ghost-title { font-family: var(--f-display); font-weight: 700; font-size: 28px; text-align: center; color: #c7c2b3; }
+.ghost-meta { text-align: center; margin: 10px 0 30px; font-size: 14px; color: #c0bba9; font-style: italic; }
+.ghost-block { margin-bottom: 22px; }
+.ghost-block b { display: block; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #aab8b1; padding-bottom: 6px; margin-bottom: 10px; border-bottom: 1px solid #e8e2d2; }
+.ghost-block i { display: block; height: 9px; margin-bottom: 9px; border-radius: 6px; background: linear-gradient(90deg, #eee9da 0%, #f6f2e6 50%, #eee9da 100%); background-size: 200% 100%; animation: shimmer 2.4s linear infinite; }
+.ghost-hint { margin-top: 36px; text-align: center; font-size: 14px; line-height: 1.7; color: #8a8f9e; }
+.ghost-hint b { color: var(--p-accent); }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* ---------- Footer, dialog, toast ---------- */
+.footer { text-align: center; padding: 0 20px 40px; font-size: 12.5px; color: var(--muted); }
+.footer p { margin: 0; }
+.dialog { border: 1px solid var(--line); border-radius: 20px; padding: 24px; width: min(92vw, 380px); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-2); }
+.dialog::backdrop { background: rgba(10, 15, 26, .55); backdrop-filter: blur(3px); }
+.dialog form { display: flex; flex-direction: column; gap: 10px; }
+.dialog h3 { margin: 0; font-family: var(--f-display); font-size: 22px; }
+.dialog p { margin: 0; color: var(--muted); font-size: 14px; }
+.dialog input { padding: 11px 12px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--surface); }
+.dialog-icon { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+
+.toasts { position: fixed; z-index: 100; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; align-items: center; width: min(92vw, 460px); pointer-events: none; }
+.toast { pointer-events: auto; padding: 11px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; background: var(--ink); color: var(--bg); box-shadow: var(--shadow-2); animation: toast-in .25s ease; }
+.toast.is-error { background: var(--danger); color: #fff; }
+.toast.is-success { background: var(--accent); color: var(--accent-ink); }
+.toast.is-warn { background: var(--warn); color: #fff; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(10px); } }
+
+/* ---------- Responsif ---------- */
+@media (max-width: 1080px) { .fc-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 980px) {
+  .workspace { grid-template-columns: 1fr; }
+  .hero { padding: 36px 0 24px; }
+}
+@media (max-width: 640px) {
+  .app { padding: 0 14px 56px; }
+  .topbar-inner { padding: 8px 14px; }
+  .hide-sm { display: none; }
+  .btn-ghost { padding: 0 12px; }
+  .paper-wrap { padding: 10px; border-radius: 16px; }
+  .paper { padding: 36px 24px 48px; min-height: 560px; font-size: 16.5px; }
+  .paper h1 { font-size: 26px; }
+  .empty-state { inset: 10px; padding: 36px 24px; }
+  .fc-grid { grid-template-columns: 1fr; }
+  .toolbar { top: 54px; }
+}
+@media (min-width: 641px) { .paper p { text-align: justify; hyphens: auto; } .paper h1 + p, .paper h1 + p + p { text-align: center; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* ---------- Cetak (Simpan sebagai PDF) ---------- */
+@media print {
+  @page { size: A4; margin: 20mm 18mm; }
+  html, body { background: #fff !important; }
+  .no-print, .topbar, .panel, .stage-head, .toolbar, .finalcheck, .empty-state, .footer, .toasts { display: none !important; }
+  .app { max-width: none; padding: 0; }
+  .workspace { display: block; }
+  .stage { display: block; }
+  .paper-wrap { background: none !important; padding: 0; border: 0; border-radius: 0; }
+  .paper { box-shadow: none !important; border-radius: 0; padding: 0; max-width: none; min-height: 0; font-size: 12pt; line-height: 1.6; }
+  .paper h1 { font-size: 22pt; }
+  .paper h2, .paper h3 { break-after: avoid; }
+  .paper p, .paper li { orphans: 3; widows: 3; }
+}
+
+</style>
 <script>(function(){try{var t=localStorage.getItem('cg-theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.dataset.theme=t}catch(e){}})()</script>
 </head>
 <body>
@@ -255,9 +645,1572 @@
 
 <div class="toasts no-print" id="toasts" aria-live="polite"></div>
 
-<script src="js/models.js" defer></script>
-<script src="js/engine.js" defer></script>
-<script src="js/export.js" defer></script>
-<script src="js/app.js" defer></script>
+<script>
+/**
+ * Metadata model catatan untuk tampilan (sisi klien).
+ * Logika penyusunan ada di js/engine.js.
+ * Untuk menambah model: set available: true di sini, lalu tambahkan fungsi penyusun di engine.js.
+ */
+window.CG = window.CG || {};
+
+window.CG.MODELS = [
+  {
+    id: 'report-writing',
+    name: 'Report Writing',
+    tagline: 'Laporan formal, faktual, dan runtut',
+    icon: 'report',
+    available: true,
+    description:
+      'Menyusun isi PDF menjadi laporan formal tentang sebuah peristiwa, kegiatan, atau situasi: faktual, orang ketiga, kalimat baku, tanpa opini pribadi.',
+    flow: [
+      { k: 'Judul', d: 'Menjelaskan isi laporan dengan jelas' },
+      { k: 'Byline', d: 'Nama dan jabatan penulis' },
+      { k: 'Tanggal & Tempat', d: 'Kapan dan di mana' },
+      { k: 'Pendahuluan', d: 'Apa, kapan, di mana, bagaimana, mengapa' },
+      { k: 'Rincian', d: 'Detail utama secara berurutan' },
+      { k: 'Kesimpulan', d: 'Ringkasan peristiwa atau hasil' },
+    ],
+  },
+  { id: 'cornell', name: 'Cornell Notes', tagline: 'Isyarat, catatan, ringkasan', icon: 'cornell', available: false },
+  { id: 'outline', name: 'Outline Bertingkat', tagline: 'Poin utama dan sub-poin', icon: 'outline', available: false },
+  { id: 'mindmap', name: 'Peta Konsep', tagline: 'Hubungan antar-gagasan', icon: 'mindmap', available: false },
+  { id: 'summary', name: 'Ringkasan Cepat', tagline: 'Inti dalam satu halaman', icon: 'summary', available: false },
+];
+
+</script>
+<script>
+/**
+ * Mesin Report Writing — berjalan sepenuhnya di browser (tanpa AI, tanpa server).
+ *
+ * Alur: teks PDF → bersihkan → deteksi judul/subjudul → pecah kalimat →
+ *       beri skor (ekstraktif) → baku-kan bahasa → ubah kalimat langsung jadi tidak langsung →
+ *       susun: Judul · Byline · Tanggal & Tempat · Pendahuluan · Rincian · Kesimpulan.
+ *
+ * Mesin ini menyusun ulang kalimat yang ADA di dokumen; ia tidak mengarang fakta baru.
+ */
+(() => {
+  'use strict';
+  const root = typeof window !== 'undefined' ? window : globalThis;
+  const CG = (root.CG = root.CG || {});
+
+  /* ====================== Konstanta ====================== */
+
+  const LABELS = {
+    en: { by: 'By', datePlace: 'Date and Place', intro: 'Introduction', body: 'Main Details', conclusion: 'Conclusion' },
+    id: { by: 'Oleh', datePlace: 'Tanggal dan Tempat', intro: 'Pendahuluan', body: 'Rincian Utama', conclusion: 'Kesimpulan' },
+  };
+  const PLACEHOLDER = {
+    en: { by: "[Writer's name]", datePlace: '[Date and place not stated in the source]' },
+    id: { by: '[Nama penulis]', datePlace: '[Tanggal dan tempat belum disebutkan]' },
+  };
+  const LENGTHS = {
+    short: { words: 300, maxSections: 3 },
+    medium: { words: 550, maxSections: 5 },
+    long: { words: 950, maxSections: 8 },
+  };
+
+  const STOP_ID = new Set(('yang dan di ke dari dalam untuk pada dengan ini itu atau juga adalah akan telah sudah dapat tidak oleh sebagai karena agar bahwa para serta saat ketika jika maka lebih sangat hanya masih belum ada seperti antara tersebut kami kita saya aku anda mereka dia ia nya pun lah kah yaitu yakni sehingga namun tetapi tapi bagi atas bawah setiap semua beberapa banyak satu dua tiga sedang bisa harus perlu kepada tentang terhadap melalui sebuah suatu hal dalam bukan merupakan menjadi sebagian lain lainnya sampai hingga setelah sebelum selama sejak olehnya adanya apa siapa mana kapan bagaimana mengapa').split(' '));
+  const STOP_EN = new Set(('the a an and or but of to in on at for with by from as is are was were be been being this that these those it its i you he she we they them his her our their not no do does did have has had will would can could may might must shall should about into over under than then there here which who whom what when where why how also more most such other some any all each both very just only so if while during after before between through').split(' '));
+
+  const MONTHS_ID = 'Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember';
+  const MONTHS_EN = 'January|February|March|April|May|June|July|August|September|October|November|December';
+  const DATE_RE = new RegExp(
+    `\\b(?:\\d{1,2}(?:\\s*[-–]\\s*\\d{1,2})?\\s+(?:${MONTHS_ID}|${MONTHS_EN})\\s+\\d{4}|(?:${MONTHS_EN})\\s+\\d{1,2},?\\s+\\d{4}|(?:${MONTHS_ID}|${MONTHS_EN})\\s+\\d{4})\\b`,
+    'i',
+  );
+
+  const CUE_RE = /\b(tujuan|bertujuan|hasil|kesimpulan|simpulan|menunjukkan|diperoleh|penting|utama|pokok|rekomendasi|saran|dilaksanakan|diselenggarakan|dihadiri|berlangsung|purpose|aim|objective|result|conclusion|shows?|found|important|main|key|recommend\w*|held|attended|took place)\b/i;
+  const PURPOSE_RE = /\b(tujuan|bertujuan|dimaksudkan untuk|purpose|aims? to|objectives?)\b/i;
+  const CONCLUSION_RE = /\b(kesimpulan|simpulan|disimpulkan|secara keseluruhan|akhirnya|dengan demikian|in conclusion|overall|to sum up|in summary|therefore|thus)\b/i;
+  const EVENT_RE = /(seminar|workshop|pelatihan|rapat|kegiatan|acara|musyawarah|kunjungan|lomba|penelitian|pertemuan|rakor|webinar|diskusi|konferensi|conference|meeting|training|event|visit|programme|program)/i;
+
+  /* ====================== Util teks ====================== */
+
+  const wordCount = (s) => (s.match(/\S+/g) || []).length;
+  const capFirst = (s) => s.replace(/^([^\p{L}\p{N}]*)(\p{L})/u, (m, a, b) => a + b.toUpperCase());
+
+  function lowFirst(s) {
+    const m = s.match(/^([^\p{L}\p{N}]*)(\S+)(?:\s+(\S+))?/u);
+    if (!m) return s;
+    const w1 = m[2];
+    const w2 = m[3] || '';
+    if (/^[A-Z]{2,}/.test(w1)) return s; // singkatan
+    if (w2 && /^\p{Lu}/u.test(w2)) return s; // kemungkinan nama
+    return s.replace(/^([^\p{L}\p{N}]*)(\p{L})/u, (mm, a, b) => a + b.toLowerCase());
+  }
+
+  function titleCase(s) {
+    const small = new Set(['dan', 'di', 'ke', 'dari', 'untuk', 'pada', 'dengan', 'yang', 'of', 'the', 'and', 'in', 'on', 'for', 'to', 'a', 'an']);
+    return s
+      .toLowerCase()
+      .split(/\s+/)
+      .map((w, i) => (i > 0 && small.has(w) ? w : w.replace(/^(\p{L})/u, (c) => c.toUpperCase())))
+      .join(' ');
+  }
+
+  function tokens(s) {
+    return (s.toLowerCase().match(/\p{L}[\p{L}\p{N}'-]*/gu) || []).filter((w) => w.length > 2);
+  }
+
+  function detectLanguage(text) {
+    const toks = (text.slice(0, 8000).toLowerCase().match(/\p{L}+/gu) || []);
+    let id = 0;
+    let en = 0;
+    for (const w of toks) {
+      if (STOP_ID.has(w) && !STOP_EN.has(w)) id++;
+      else if (STOP_EN.has(w) && !STOP_ID.has(w)) en++;
+    }
+    return id >= en ? 'id' : 'en';
+  }
+
+  /* ====================== Bersihkan & strukturkan ====================== */
+
+  const BULLET_RE = /^(?:[•▪●◦■□–—*-]|\(?\d{1,2}[.)]|\(?[a-z][.)])\s+/;
+  const PAGE_NO_RE = /^\s*(?:halaman|page|hal\.?)?\s*\d+(?:\s*(?:dari|of|\/)\s*\d+)?\s*$/i;
+
+  function normalize(raw) {
+    return String(raw)
+      .replace(/\r/g, '')
+      .replace(/\u00ad/g, '')
+      .replace(/[\u200b-\u200d\ufeff]/g, '')
+      .replace(/\u00a0/g, ' ')
+      .replace(/[“”„«»]/g, '"')
+      .replace(/[‘’‚]/g, "'")
+      .replace(/(\p{L})-\n(\p{Ll})/gu, '$1$2')
+      .replace(/[ \t]+/g, ' ');
+  }
+
+  const KNOWN_HEAD = /^(pendahuluan|penutup|kesimpulan|simpulan|abstrak|latar belakang|tujuan|metode|metodologi|hasil|pembahasan|saran|rekomendasi|agenda|jadwal|rincian|uraian|kegiatan|introduction|background|methods?|methodology|results?|discussion|conclusions?|summary|recommendations?|agenda|schedule|overview|objectives?)(?:\s+(?:dan|and|&)\s+\p{L}+)?$/iu;
+
+  function isHeading(line, next) {
+    if (line.length > 90 || line.length < 3) return false;
+    if (KNOWN_HEAD.test(line.replace(/[:：]$/, '').trim())) return true;
+    if (/[.,;!?]$/.test(line)) return false;
+    const words = line.split(/\s+/);
+    const n = words.length;
+    if (n > 12) return false;
+    const letters = (line.match(/\p{L}/gu) || []).length;
+    if (letters < 3 || letters / line.length < 0.55) return false;
+    const upper = (line.match(/\p{Lu}/gu) || []).length;
+    if (letters >= 4 && upper / letters > 0.8) return true; // HURUF KAPITAL
+    if (/^(?:\d+(?:\.\d+){0,3}|[IVXLC]+|[A-Z])[.)]\s+\S/.test(line) && n <= 9) return true; // bernomor
+    if (n >= 2) {
+      const big = words.filter((w) => w.length > 3);
+      const cap = big.filter((w) => /^\p{Lu}/u.test(w)).length;
+      if (big.length && cap / big.length >= 0.66 && !(next && /^\p{Ll}/u.test(next))) return true; // Title Case
+    }
+    return false;
+  }
+
+  /** Mengembalikan { title, blocks:[{h:string|null, text:string}] } */
+  function structure(raw) {
+    const text = normalize(raw);
+    let lines = text.split('\n').map((l) => l.trim());
+
+    // buang header/footer berulang, nomor halaman, titik-titik daftar isi
+    const freq = new Map();
+    lines.forEach((l) => { if (l && l.length < 80) freq.set(l, (freq.get(l) || 0) + 1); });
+    lines = lines.filter((l) => {
+      if (!l) return true;
+      if (PAGE_NO_RE.test(l)) return false;
+      if (/\.{5,}/.test(l)) return false;
+      if (!/[\p{L}\p{N}]/u.test(l)) return false;
+      if ((freq.get(l) || 0) >= 3 && l.length < 70 && !/[.!?]$/.test(l)) return false;
+      return true;
+    });
+
+    // judul: baris mirip-judul di awal dokumen
+    let title = '';
+    let titleAt = -1;
+    const nonEmpty = [];
+    lines.forEach((l, i) => { if (l) nonEmpty.push(i); });
+    for (const i of nonEmpty.slice(0, 14)) {
+      const l = lines[i];
+      const w = wordCount(l);
+      if (w < 2 || w > 16 || /[.;!?]$/.test(l)) continue;
+      if (/^(daftar isi|table of contents|contents|abstrak|abstract|kata pengantar|halaman|page|bab\b|chapter\b)/i.test(l)) continue;
+      if (/^\d/.test(l) || DATE_RE.test(l)) continue;
+      title = l;
+      titleAt = i;
+      break;
+    }
+    if (titleAt >= 0) lines[titleAt] = '';
+
+    const blocks = [];
+    let cur = { h: null, text: '' };
+    const flush = () => {
+      if (cur.text.trim()) blocks.push({ h: cur.h, text: cur.text.trim() });
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const l = lines[i];
+      if (!l) continue;
+      let next = '';
+      for (let j = i + 1; j < lines.length; j++) { if (lines[j]) { next = lines[j]; break; } }
+      if (isHeading(l, next) && i !== titleAt) {
+        flush();
+        cur = { h: l.replace(/^(?:\d+(?:\.\d+){0,3}|[IVXLC]+|[A-Z])[.)]\s+/, '').replace(/[:：]$/, '').trim(), text: '' };
+        continue;
+      }
+      let piece = l;
+      if (BULLET_RE.test(piece)) {
+        piece = piece.replace(BULLET_RE, '');
+        if (cur.text && !/[.!?:]$/.test(cur.text.trim())) cur.text = cur.text.trim() + '.';
+        if (!/[.!?]$/.test(piece)) piece += '.';
+      }
+      cur.text += (cur.text && !cur.text.endsWith(' ') ? ' ' : '') + piece;
+    }
+    flush();
+
+    // heading bertanda ALL CAPS → Title Case
+    blocks.forEach((b) => {
+      if (b.h && b.h === b.h.toUpperCase()) b.h = titleCase(b.h);
+    });
+    if (title && title === title.toUpperCase()) title = titleCase(title);
+    return { title, blocks };
+  }
+
+  /* ====================== Pecah kalimat ====================== */
+
+  const D = '\u0001';
+  function protect(s) {
+    return s
+      .replace(/\b(dr|drs|dra|prof|ir|hj|kh|mr|mrs|ms|st|no|nos|hal|tgl|jl|jln|yth|dll|dsb|dst|dkk|sdr|sdri|bpk|vs|etc|fig|al|ca|cf|inc|ltd|co|jr|sr|approx|eg|ie)\./gi, `$1${D}`)
+      .replace(/\b(?:\p{L}\.){2,}/gu, (m) => m.replace(/\./g, D))
+      .replace(/(\d)\.(\d)/g, `$1${D}$2`)
+      .replace(/\b(\p{Lu})\.(?=\s?\p{Lu})/gu, `$1${D}`);
+  }
+
+  function splitSentences(text) {
+    const t = protect(text);
+    const parts = t.match(/[^.!?]+(?:[.!?]+["')\]]*|$)/g) || [];
+    return parts.map((p) => p.replace(new RegExp(D, 'g'), '.').trim()).filter(Boolean);
+  }
+
+  /* ====================== Pembakuan bahasa ====================== */
+
+  const INFORMAL_ID = [
+    [/\b(?:nggak|ngga|gak|enggak|tdk)\b/gi, 'tidak'],
+    [/\b(?:udah|sdh|dah)\b/gi, 'sudah'],
+    [/\b(?:belom|blm)\b/gi, 'belum'],
+    [/\b(?:banget|bgt)\b/gi, 'sekali'],
+    [/\bbikin\b/gi, 'membuat'],
+    [/\baja\b/gi, 'saja'],
+    [/\bkayak\b/gi, 'seperti'],
+    [/\b(?:cuma|cuman)\b/gi, 'hanya'],
+    [/\bgimana\b/gi, 'bagaimana'],
+    [/\bkalo\b/gi, 'jika'],
+    [/\bemang\b/gi, 'memang'],
+    [/\byg\b/gi, 'yang'],
+    [/\bdgn\b/gi, 'dengan'],
+    [/\butk\b/gi, 'untuk'],
+    [/\bdll\b\.?/gi, 'dan lain-lain'],
+    [/\bdst\b\.?/gi, 'dan seterusnya'],
+    [/\b(?:krn|karna)\b/gi, 'karena'],
+    [/\bsbg\b/gi, 'sebagai'],
+    [/\bspt\b/gi, 'seperti'],
+    [/\bjg\b/gi, 'juga'],
+    [/\bhrs\b/gi, 'harus'],
+    [/\btp\b/gi, 'tetapi'],
+    [/\btrus\b/gi, 'kemudian'],
+    [/\bbilang\b/gi, 'mengatakan'],
+    [/\bpake\b/gi, 'memakai'],
+    [/\bngomong\b/gi, 'berbicara'],
+    [/\bliat\b/gi, 'melihat'],
+    [/\bgede\b/gi, 'besar'],
+    [/\b(?:ya|dong|deh|sih|lho|kok|nih|tuh|wah|wow|hehe|haha)\b,?\s*/gi, ''],
+  ];
+  const INFORMAL_EN = [
+    [/\bgonna\b/gi, 'going to'],
+    [/\bwanna\b/gi, 'want to'],
+    [/\bgotta\b/gi, 'have to'],
+    [/\bkinda\b/gi, 'somewhat'],
+    [/\ba lot of\b/gi, 'many'],
+    [/\blots of\b/gi, 'many'],
+    [/\bcan't\b/gi, 'cannot'],
+    [/\bwon't\b/gi, 'will not'],
+    [/\bshan't\b/gi, 'shall not'],
+    [/(\w+)n't\b/gi, '$1 not'],
+    [/(\w+)'re\b/gi, '$1 are'],
+    [/(\w+)'ve\b/gi, '$1 have'],
+    [/(\w+)'ll\b/gi, '$1 will'],
+    [/\bI'm\b/g, 'I am'],
+    [/\b(?:awesome|amazing|fantastic|wonderful|incredible)\b/gi, 'notable'],
+    [/\b(?:wow|hey|oh)\b,?\s*/gi, ''],
+  ];
+
+  function formalize(s, lang) {
+    let t = s
+      .replace(/\p{Extended_Pictographic}/gu, '')
+      .replace(/!+/g, '.')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\s+([,.;:])/g, '$1');
+    const table = lang === 'id' ? INFORMAL_ID : INFORMAL_EN;
+    table.forEach(([re, rep]) => { t = t.replace(re, rep); });
+
+    // kata ganti orang pertama → orang ketiga
+    if (lang === 'id') {
+      t = t.replace(/\b(?:saya|aku)\b/gi, 'penulis').replace(/\b(?:kami|kita)\b/gi, 'mereka');
+    } else {
+      t = t
+        .replace(/\bI am\b/g, 'the writer is')
+        .replace(/\bI have\b/g, 'the writer has')
+        .replace(/\bI\b/g, 'the writer')
+        .replace(/\b[Mm]y\b/g, "the writer's")
+        .replace(/\bme\b/g, 'the writer')
+        .replace(/\b[Ww]e\b/g, 'they')
+        .replace(/\b[Oo]ur\b/g, 'their')
+        .replace(/\bus\b/g, 'them');
+    }
+    t = t.replace(/\s{2,}/g, ' ').replace(/^[\s,;:]+/, '').trim();
+    return capFirst(t);
+  }
+
+  /* ====================== Kalimat langsung → tidak langsung ====================== */
+
+  const TIME_ID = [
+    [/\bhari ini\b/gi, 'pada hari itu'],
+    [/\bbesok\b/gi, 'keesokan harinya'],
+    [/\bkemarin\b/gi, 'hari sebelumnya'],
+    [/\bsekarang\b/gi, 'saat itu'],
+    [/\bdi sini\b/gi, 'di tempat itu'],
+    [/\bminggu depan\b/gi, 'minggu berikutnya'],
+    [/\bminggu lalu\b/gi, 'minggu sebelumnya'],
+    [/\bmalam ini\b/gi, 'pada malam itu'],
+    [/\b(?:saya|aku)\b/gi, 'ia'],
+    [/\bkami\b/gi, 'pihaknya'],
+    [/\b(?:kita|kalian|anda|kamu)\b/gi, 'mereka'],
+  ];
+
+  const EN_VERBS = {
+    go: 'went', come: 'came', make: 'made', take: 'took', give: 'gave', get: 'got', see: 'saw', know: 'knew',
+    think: 'thought', feel: 'felt', want: 'wanted', need: 'needed', hope: 'hoped', believe: 'believed',
+    like: 'liked', love: 'loved', work: 'worked', plan: 'planned', expect: 'expected', appreciate: 'appreciated',
+    support: 'supported', join: 'joined', attend: 'attended', hold: 'held', start: 'started', begin: 'began',
+    bring: 'brought', find: 'found', tell: 'told', ask: 'asked', say: 'said',
+  };
+  const TIME_EN = [
+    [/\btoday\b/gi, 'that day'],
+    [/\btomorrow\b/gi, 'the next day'],
+    [/\byesterday\b/gi, 'the previous day'],
+    [/\btonight\b/gi, 'that night'],
+    [/\bnext week\b/gi, 'the following week'],
+    [/\blast week\b/gi, 'the previous week'],
+    [/\bnow\b/gi, 'then'],
+    [/\bhere\b/gi, 'there'],
+    [/\bthese\b/gi, 'those'],
+    [/\bthis\b/gi, 'that'],
+    [/\bago\b/gi, 'before'],
+  ];
+
+  const SAY_ID = 'berkata|mengatakan|menyatakan|menjelaskan|mengungkapkan|menegaskan|menyampaikan|menambahkan|bertanya|menanyakan|mengumumkan|menyebutkan|berujar|ujar|kata|tutur|menuturkan|mengimbau|meminta|berpesan|berharap|mengingatkan|tanya';
+  const SAY_EN = 'said|says|stated|states|explained|explains|announced|announces|added|adds|asked|asks|told|replied|replies|emphasised|emphasized|emphasises|emphasizes|noted|notes|remarked|declared|exclaimed|reminded|urged|requested|advised';
+  const SPEAKER = "((?:[\\p{L}][\\p{L}.'’-]*,?\\s+){0,5}?[\\p{L}][\\p{L}.'’-]*,?)";
+  const ROLE = 'ketua|kepala|direktur|rektor|dekan|menteri|bupati|walikota|gubernur|presiden|sekretaris|bendahara|panitia|narasumber|moderator|pembicara|peserta|mayor|chairman|chair|coordinator|director|speaker|manager|teacher|president|minister|professor';
+  const SPK_B = `(?:(?:he|she|they)(?=[\\s.,;]|$)|(?:the|a|an)\\s+\\p{L}+(?:\\s\\p{L}+)?|(?:${ROLE})(?:\\s+\\p{Lu}[\\p{L}.'’-]*){0,3}|(?:\\p{Lu}[\\p{L}'’-]*\\s?){1,5})`;
+
+  const WH_ID = /^(apa|siapa|kapan|di mana|dimana|mengapa|kenapa|bagaimana|berapa|mana)\b/i;
+  const WH_EN = /^(what|who|whom|when|where|why|how|which|whose)\b/i;
+
+  function quoteBody(q, lang) {
+    let s = q.trim().replace(/[\s,;:]+$/, '');
+    const parts = s.split(/(?<=[.!?])\s+(?=\p{Lu})/u).map((p) => p.replace(/[.!?]+$/, '').trim()).filter(Boolean);
+    s = parts.map((p, i) => (i ? lowFirst(p) : p)).join('; ');
+    return { text: s, question: /\?\s*$/.test(q.trim()) };
+  }
+
+  function shiftQuoteID(s) {
+    let t = s;
+    TIME_ID.forEach(([re, rep]) => { t = t.replace(re, rep); });
+    return t;
+  }
+
+  function shiftQuoteEN(s) {
+    let t = s
+      .replace(/\b(?:I am|[Ww]e are|[Yy]ou are)\b/g, 'they were')
+      .replace(/\bI\b/g, 'they')
+      .replace(/\b[Mm]y\b/g, 'their')
+      .replace(/\b[Mm]e\b/g, 'them')
+      .replace(/\b[Ww]e\b/g, 'they')
+      .replace(/\b[Oo]ur\b/g, 'their')
+      .replace(/\bus\b/g, 'them')
+      .replace(/\b[Yy]ou\b/g, 'they')
+      .replace(/\b[Yy]our\b/g, 'their');
+    TIME_EN.forEach(([re, rep]) => { t = t.replace(re, rep); });
+    t = t
+      .replace(/\b(?:have|has) to\b/gi, 'had to')
+      .replace(/\b(?:do not|does not)\b/gi, 'did not')
+      .replace(/\b(?:am|is)\b/gi, 'was')
+      .replace(/\bare\b/gi, 'were')
+      .replace(/\bwill\b/gi, 'would')
+      .replace(/\bcan\b/gi, 'could')
+      .replace(/\bmay\b/gi, 'might')
+      .replace(/\bmust\b/gi, 'had to')
+      .replace(/\b(?:have|has)\b/gi, 'had');
+    t = t.replace(/\b(they)\s+([a-z]+)\b/gi, (m, subj, verb) => {
+      const past = EN_VERBS[verb.toLowerCase()];
+      return past ? `${subj} ${past}` : m;
+    });
+    return t;
+  }
+
+  function buildReportedID(speaker, verb, q) {
+    const v = verb.toLowerCase();
+    const { text, question } = quoteBody(q, 'id');
+    let body = shiftQuoteID(text);
+    const sp = speaker.trim().replace(/[,\s]+$/, '');
+    if (question || /^(?:bertanya|menanyakan|tanya)$/.test(v)) {
+      body = body.replace(/^apakah\s+/i, '');
+      const head = WH_ID.test(body) ? '' : 'apakah ';
+      return `${sp} menanyakan ${head}${lowFirst(body)}.`;
+    }
+    if (/^(?:mari|ayo)\b/i.test(body)) return `${sp} mengajak agar ${body.replace(/^(?:mari|ayo)\s+/i, '')}.`;
+    if (/^(?:harap|tolong|mohon|jangan|silakan|silahkan)\b/i.test(body)) {
+      return `${sp} meminta agar ${body.replace(/^(?:harap|tolong|mohon)\s+/i, '')}.`;
+    }
+    if (/^(?:meminta|mengimbau|berpesan|mengingatkan)$/.test(v)) return `${sp} ${v} agar ${lowFirst(body)}.`;
+    const rv = /^(?:kata|ujar|tutur|berkata|berujar|mengatakan)$/.test(v) ? 'menyatakan' : v;
+    return `${sp} ${rv} bahwa ${lowFirst(body)}.`;
+  }
+
+  const PAST_EN = {
+    say: 'said', says: 'said', states: 'stated', explains: 'explained', announces: 'announced', adds: 'added',
+    asks: 'asked', replies: 'replied', emphasises: 'emphasised', emphasizes: 'emphasised', emphasized: 'emphasised', notes: 'noted',
+  };
+
+  function buildReportedEN(speaker, verb, q) {
+    const v = verb.toLowerCase();
+    const past = PAST_EN[v] || v;
+    const { text, question } = quoteBody(q, 'en');
+    const sp = speaker.trim().replace(/[,\s]+$/, '');
+    if (question || past === 'asked') {
+      let q = text;
+      if (WH_EN.test(q)) return `${sp} asked ${lowFirst(shiftQuoteEN(q))}.`;
+      const inv = q.match(/^(am|is|are|was|were|can|could|will|would|shall|should|may|might|must|have|has|had)\s+(\S+)\s+(.*)$/i);
+      const dos = q.match(/^(?:do|does|did)\s+(.*)$/i);
+      if (inv) q = `${inv[2]} ${inv[1].toLowerCase()} ${inv[3]}`;
+      else if (dos) q = dos[1];
+      return `${sp} asked whether ${lowFirst(shiftQuoteEN(q))}.`;
+    }
+    let body = shiftQuoteEN(text);
+    if (past === 'requested' || past === 'urged' || past === 'advised') {
+      return `${sp} ${past} that ${lowFirst(body)}.`;
+    }
+    return `${sp} ${past === 'told' ? 'said' : past} that ${lowFirst(body)}.`;
+  }
+
+  function convertQuotes(text, lang) {
+    const base = lang === 'id' ? SAY_ID : SAY_EN;
+    // tanpa flag "i" (agar \p{Lu} tetap huruf kapital); varian kapital disertakan manual
+    const sayRe = `${base}|${base.split('|').map((v) => v[0].toUpperCase() + v.slice(1)).join('|')}`;
+    const build = lang === 'id' ? buildReportedID : buildReportedEN;
+    let t = text;
+
+    for (let pass = 0; pass < 6; pass++) {
+      const before = t;
+
+      // A: Pembicara + kata kerja + "kutipan"
+      const reA = new RegExp(`(^|[.!?]["']?\\s+)${SPEAKER}\\s+(${sayRe})\\s*[,:]?\\s*"([^"]{3,500})"`, 'gu');
+      t = t.replace(reA, (m, pre, speaker, verb, q) => `${pre}${build(speaker, verb, q)}`);
+
+      // B1: "kutipan," kata Pembicara.   (kata kerja sebelum pembicara)
+      const reB = new RegExp(`"([^"]{3,500}?)([,.!?]?)"\\s*,?\\s*(${sayRe})\\s+(${SPK_B})(?=[.,;]|\\s|$)\\.?`, 'gu');
+      t = t.replace(reB, (m, q, pu, verb, speaker) => build(speaker.trim(), verb, q + (pu === '?' ? '?' : '')));
+
+      // B2: "kutipan," the coordinator said.   (pembicara sebelum kata kerja, Inggris)
+      if (lang === 'en') {
+        const reC = new RegExp(`"([^"]{3,500}?)([,.!?]?)"\\s*,?\\s*(${SPK_B})\\s+(${sayRe})\\b\\.?`, 'gu');
+        t = t.replace(reC, (m, q, pu, speaker, verb) => build(capFirst(speaker.trim()), verb, q + (pu === '?' ? '?' : '')));
+      }
+      if (t === before) break;
+    }
+    return t;
+  }
+
+  /* ====================== Skor kalimat ====================== */
+
+  function buildStop(lang) { return lang === 'id' ? STOP_ID : STOP_EN; }
+
+  const GENERIC_HEAD = /^(pendahuluan|penutup|kesimpulan|simpulan|abstrak|abstract|introduction|conclusion|summary|ringkasan|latar belakang|saran|referensi|daftar pustaka|references|lampiran|appendix)$/i;
+  const GENERIC_WORDS = new Set(('acara kegiatan dokumen laporan peserta hasil bagian proses pihak tahun waktu orang hal cara salah satu document report event activity part people time year result results said stated explained announced added asked told noted menyatakan mengatakan menjelaskan').split(' '));
+
+  /** Frasa kunci: bigram yang berulang lebih dulu, lalu kata tunggal. */
+  function keywordsOf(sentences, lang, n, boost) {
+    const stop = buildStop(lang);
+    const uni = new Map();
+    const bi = new Map();
+    const bump = (m, k, v) => m.set(k, (m.get(k) || 0) + v);
+    sentences.forEach((s) => {
+      const toks = (s.toLowerCase().match(/\p{L}[\p{L}\p{N}'-]*/gu) || []);
+      toks.forEach((w, i) => {
+        const ok = (x) => x && x.length > 3 && !stop.has(x) && !GENERIC_WORDS.has(x) && !/^\d+$/.test(x);
+        if (ok(w)) bump(uni, w, 1);
+        if (ok(w) && ok(toks[i + 1])) bump(bi, `${w} ${toks[i + 1]}`, 1);
+      });
+    });
+    const bw = boost || new Set();
+    const out = [];
+    const taken = new Set();
+    const rankedBi = [...bi.entries()].filter((e) => e[1] >= 2).sort((a, b) => b[1] - a[1]);
+    for (const [k] of rankedBi) {
+      const ws = k.split(' ');
+      if (ws.some((w) => taken.has(w))) continue;
+      out.push(k);
+      ws.forEach((w) => taken.add(w));
+      if (out.length >= n) return out;
+    }
+    const rankedUni = [...uni.entries()].map(([k, v]) => [k, v + (bw.has(k) ? 3 : 0)]).sort((a, b) => b[1] - a[1]);
+    for (const [k, v] of rankedUni) {
+      if (taken.has(k) || v < 2) continue;
+      out.push(k);
+      taken.add(k);
+      if (out.length >= n) break;
+    }
+    return out;
+  }
+
+  function similarity(a, b) {
+    const A = new Set(a);
+    const B = new Set(b);
+    if (!A.size || !B.size) return 0;
+    let inter = 0;
+    A.forEach((x) => { if (B.has(x)) inter++; });
+    return inter / (A.size + B.size - inter);
+  }
+
+  function isJunk(s) {
+    const letters = (s.match(/\p{L}/gu) || []).length;
+    if (wordCount(s) < 5 || letters / s.length < 0.6) return true;
+    if (/(?:https?:\/\/|www\.)\S+/i.test(s) && wordCount(s) < 9) return true;
+    if (/\.{4,}/.test(s)) return true;
+    if (/@\S+\.\S+/.test(s) && wordCount(s) < 8) return true;
+    return false;
+  }
+
+  function scoreAll(all, lang, focus) {
+    const stop = buildStop(lang);
+    const freq = new Map();
+    all.forEach((o) => o.toks.forEach((w) => { if (!stop.has(w)) freq.set(w, (freq.get(w) || 0) + 1); }));
+    const maxF = Math.max(1, ...freq.values());
+    const total = all.length;
+    all.forEach((o, i) => {
+      const content = o.toks.filter((w) => !stop.has(w));
+      let sc = content.reduce((a, w) => a + (freq.get(w) || 0) / maxF, 0) / Math.pow(Math.max(content.length, 1), 0.72);
+      if (/\d/.test(o.text)) sc *= 1.12;
+      if (DATE_RE.test(o.text)) sc *= 1.15;
+      if (CUE_RE.test(o.text)) sc *= 1.25;
+      if (o.first) sc *= 1.2;
+      if (i < total * 0.1) sc *= 1.12;
+      if (i > total * 0.9) sc *= 1.08;
+      const w = wordCount(o.text);
+      if (w < 8) sc *= 0.6;
+      if (w > 55) sc *= 0.7;
+      if (/\b(?:saya|aku|kami|kita|I|we|my|our)\b/.test(o.raw)) sc *= 0.75;
+      if (focus.size) {
+        let hit = 0;
+        o.toks.forEach((t) => { if (focus.has(t)) hit++; });
+        sc *= 1 + Math.min(1.2, hit * 0.45);
+      }
+      o.score = sc;
+    });
+  }
+
+  function pickTop(items, budgetWords, minOne) {
+    const chosen = [];
+    let used = 0;
+    const sorted = [...items].sort((a, b) => b.score - a.score);
+    for (const it of sorted) {
+      const w = wordCount(it.text);
+      if (chosen.some((c) => similarity(c.toks, it.toks) > 0.6)) continue;
+      if (used + w > budgetWords && chosen.length >= (minOne ? 1 : 0)) {
+        if (used >= budgetWords * 0.85) break;
+        continue;
+      }
+      chosen.push(it);
+      used += w;
+      if (used >= budgetWords) break;
+    }
+    return chosen.sort((a, b) => a.idx - b.idx);
+  }
+
+  /* ====================== Tanggal & tempat ====================== */
+
+  function detectDatePlace(text) {
+    const head = text.slice(0, 4000);
+    const d = head.match(DATE_RE);
+    if (!d) return null;
+    const date = d[0].replace(/\s+/g, ' ');
+    const around = head.slice(Math.max(0, d.index - 140), d.index + date.length + 140);
+    const loc = around.match(/\b(?:di|at|in)\s+((?:\p{Lu}[\p{L}-]+)(?:\s+(?:\p{Lu}[\p{L}-]+|dan|and)){0,3})/u)
+      || around.match(new RegExp(`(\\p{Lu}[\\p{L}-]+(?:\\s\\p{Lu}[\\p{L}-]+)?),\\s*${date.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'u'));
+    return { date, place: loc ? loc[1].trim() : '' };
+  }
+
+  /* ====================== Susun laporan ====================== */
+
+  function listJoin(items, lang) {
+    if (items.length <= 1) return items.join('');
+    const and = lang === 'id' ? 'dan' : 'and';
+    if (items.some((i) => new RegExp(`\\s${and}\\s`, 'i').test(i))) {
+      if (items.length === 2) return `${items[0]} ${lang === 'id' ? 'serta' : 'as well as'} ${items[1]}`;
+      return `${items.slice(0, -1).join('; ')}; ${lang === 'id' ? 'serta' : 'and'} ${items[items.length - 1]}`;
+    }
+    return `${items.slice(0, -1).join(', ')}${lang === 'en' && items.length > 2 ? ',' : ''} ${and} ${items[items.length - 1]}`;
+  }
+
+  function stemName(fileName) {
+    const base = String(fileName || 'Dokumen').replace(/\.pdf$/i, '').replace(/[_\-.]+/g, ' ').replace(/\s+/g, ' ').trim() || 'Dokumen';
+    return base === base.toLowerCase() ? titleCase(base) : base;
+  }
+
+  function generate({ text, fileName, pages, options }) {
+    const opt = options || {};
+    const lang = opt.language && opt.language !== 'auto' ? opt.language : detectLanguage(text);
+    const L = LABELS[lang];
+    const target = (LENGTHS[opt.length] || LENGTHS.medium);
+    const notes = [];
+
+    const struct = structure(text);
+    const sourceLang = detectLanguage(text);
+    if (opt.language && opt.language !== 'auto' && opt.language !== sourceLang) {
+      notes.push(`Dokumen berbahasa ${sourceLang === 'id' ? 'Indonesia' : 'Inggris'}; kalimat isi tetap memakai bahasa aslinya, sedangkan judul, label, dan kalimat penghubung mengikuti bahasa pilihan.`);
+    }
+
+    // Kalimat per blok
+    let idx = 0;
+    const sections = [];
+    struct.blocks.forEach((b) => {
+      const converted = convertQuotes(b.text, sourceLang);
+      const sents = splitSentences(converted)
+        .map((raw, k) => ({ raw, text: formalize(raw, sourceLang), first: k === 0 }))
+        .filter((s) => !isJunk(s.text))
+        .map((s) => ({ ...s, idx: idx++, toks: tokens(s.text), score: 0 }));
+      if (sents.length) sections.push({ h: b.h, sents });
+    });
+
+    const all = sections.flatMap((s) => s.sents);
+    if (all.length < 3) throw new Error('Teks yang terbaca terlalu sedikit untuk dijadikan laporan.');
+
+    const focus = new Set();
+    if (opt.notes) tokens(opt.notes).forEach((w) => { if (!buildStop(lang).has(w) && !buildStop(sourceLang).has(w) && w.length > 3) focus.add(w); });
+    scoreAll(all, sourceLang, focus);
+
+    /* --- judul --- */
+    const rawTitle = (struct.title || '').replace(/\s+/g, ' ').trim();
+    const docTitle = rawTitle || stemName(fileName);
+    let h1;
+    if (/\b(laporan|report)\b/i.test(docTitle)) h1 = docTitle;
+    else if (lang === 'id') h1 = `${EVENT_RE.test(docTitle) ? 'Laporan' : 'Laporan tentang'} ${docTitle}`;
+    else h1 = `Report on ${docTitle}`;
+    h1 = h1.replace(/[.\s]+$/, '');
+    if (!rawTitle) notes.push('Judul diambil dari nama berkas karena judul dokumen tidak terdeteksi. Ganti dengan judul yang lebih spesifik.');
+
+    /* --- byline, tanggal & tempat --- */
+    const by = opt.author || PLACEHOLDER[lang].by;
+    const found = detectDatePlace(text);
+    let datePlace = opt.datePlace;
+    if (!datePlace && found) datePlace = found.place ? `${found.date}, ${found.place}` : found.date;
+    if (!datePlace) { datePlace = PLACEHOLDER[lang].datePlace; notes.push('Tanggal dan tempat tidak ditemukan di dokumen. Isi di kolom "Tanggal & tempat" atau langsung di kertas kerja.'); }
+    if (!opt.author) notes.push('Nama penulis belum diisi (byline masih berupa tanda kurung siku).');
+
+    /* --- pendahuluan --- */
+    const headingList = sections.map((s) => s.h).filter((h) => h && !GENERIC_HEAD.test(h.trim()));
+    const titleWords = new Set(tokens(docTitle));
+    const topics = headingList.length >= 2 ? headingList.slice(0, 4) : keywordsOf(all.map((a) => a.text), sourceLang, 4, titleWords);
+    const purpose = all.find((s) => PURPOSE_RE.test(s.text) && wordCount(s.text) <= 45);
+    const intro = [];
+    if (lang === 'id') {
+      intro.push(`Laporan ini menguraikan pokok-pokok isi dokumen berjudul "${docTitle}"${pages ? ` yang terdiri atas ${pages} halaman` : ''}.`);
+      if (purpose) intro.push(purpose.text);
+      if (topics.length) intro.push(`Pembahasan meliputi ${listJoin(topics, 'id')}.`);
+    } else {
+      intro.push(`This report outlines the main points of the document titled "${docTitle}"${pages ? `, which consists of ${pages} pages` : ''}.`);
+      if (purpose) intro.push(purpose.text);
+      if (topics.length) intro.push(`The discussion covers ${listJoin(topics, 'en')}.`);
+    }
+
+    /* --- kesimpulan (pilih dulu supaya tidak dobel di rincian) --- */
+    const concCandidates = all.filter((s) => CONCLUSION_RE.test(s.text) && wordCount(s.text) <= 50);
+    const lastSlice = all.slice(Math.floor(all.length * 0.85));
+    const concSentence = concCandidates.length
+      ? concCandidates[concCandidates.length - 1]
+      : [...lastSlice].sort((a, b) => b.score - a.score)[0];
+    const kw = headingList.length >= 2 ? headingList.slice(0, 3) : keywordsOf(all.map((a) => a.text), sourceLang, 3, titleWords);
+    const concl = [];
+    if (concSentence) concl.push(concSentence.text);
+    if (kw.length >= 2) {
+      concl.push(lang === 'id'
+        ? `Secara keseluruhan, dokumen ini memaparkan ${listJoin(kw, 'id')} beserta rincian pendukungnya.`
+        : `Overall, the document presents ${listJoin(kw, 'en')} together with supporting details.`);
+    }
+
+    /* --- rincian utama --- */
+    const used = new Set([concSentence && concSentence.idx, purpose && purpose.idx]);
+    const introW = intro.reduce((a, s) => a + wordCount(s), 0);
+    const conclW = concl.reduce((a, s) => a + wordCount(s), 0);
+    const bodyBudget = Math.max(120, target.words - introW - conclW);
+
+    const bodyBlocks = [];
+    let secs = sections.filter((s) => s.sents.length);
+    const useHeads = secs.filter((s) => s.h).length >= 2;
+
+    if (useHeads) {
+      if (secs.length > target.maxSections) {
+        const rank = secs.map((s, i) => ({ s, i, v: s.sents.reduce((a, b) => a + b.score, 0) / Math.sqrt(s.sents.length) }))
+          .sort((a, b) => b.v - a.v).slice(0, target.maxSections).sort((a, b) => a.i - b.i);
+        secs = rank.map((r) => r.s);
+      }
+      const totalScore = secs.reduce((a, s) => a + s.sents.reduce((x, y) => x + y.score, 0), 0) || 1;
+      secs.forEach((s) => {
+        const share = s.sents.reduce((x, y) => x + y.score, 0) / totalScore;
+        const budget = Math.max(28, Math.round(bodyBudget * share));
+        const cands = s.sents.filter((x) => !used.has(x.idx));
+        if (!cands.length) return;
+        const chosen = pickTop(cands, budget, true);
+        if (!chosen.length) return;
+        if (s.h && !GENERIC_HEAD.test(s.h.trim())) bodyBlocks.push({ t: 'h3', v: capFirst(s.h) });
+        for (let i = 0; i < chosen.length; i += 3) bodyBlocks.push({ t: 'p', v: chosen.slice(i, i + 3).map((c) => c.text).join(' ') });
+      });
+    } else {
+      const cands = all.filter((x) => !used.has(x.idx));
+      const chosen = pickTop(cands, bodyBudget, true);
+      for (let i = 0; i < chosen.length; i += 3) bodyBlocks.push({ t: 'p', v: chosen.slice(i, i + 3).map((c) => c.text).join(' ') });
+    }
+    if (!bodyBlocks.length) throw new Error('Tidak ada kalimat yang cukup layak untuk dijadikan rincian.');
+
+    const blocks = [
+      { t: 'h1', v: h1 },
+      { t: 'meta', label: `${L.by}:`, v: by },
+      { t: 'meta', label: `${L.datePlace}:`, v: datePlace },
+      { t: 'h2', v: L.intro },
+      { t: 'p', v: intro.join(' ') },
+      { t: 'h2', v: L.body },
+      ...bodyBlocks,
+      { t: 'h2', v: L.conclusion },
+      { t: 'p', v: concl.join(' ') },
+    ];
+    return { blocks, lang, notes };
+  }
+
+  /* ====================== Render ====================== */
+
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  function toHtml(blocks) {
+    return blocks.map((b) => {
+      if (b.t === 'meta') return `<p><strong>${esc(b.label)}</strong> ${esc(b.v)}</p>`;
+      return `<${b.t}>${esc(b.v)}</${b.t}>`;
+    }).join('\n');
+  }
+
+  /** Potong blok sampai n karakter (untuk efek mengetik). */
+  function partial(blocks, n) {
+    const out = [];
+    let left = n;
+    for (const b of blocks) {
+      if (left <= 0) break;
+      const len = (b.label ? b.label.length + 1 : 0) + b.v.length;
+      if (len <= left) { out.push(b); left -= len; continue; }
+      if (b.label) {
+        if (left <= b.label.length) { out.push({ ...b, label: b.label.slice(0, left), v: '' }); }
+        else out.push({ ...b, v: b.v.slice(0, left - b.label.length - 1) });
+      } else out.push({ ...b, v: b.v.slice(0, left) });
+      left = 0;
+    }
+    return out;
+  }
+
+  const size = (blocks) => blocks.reduce((a, b) => a + (b.label ? b.label.length + 1 : 0) + b.v.length, 0);
+
+  CG.engine = { generate, toHtml, partial, size, detectLanguage, splitSentences, convertQuotes, formalize, structure };
+  if (typeof module !== 'undefined' && module.exports) module.exports = CG.engine;
+})();
+
+</script>
+<script>
+/**
+ * Ekspor dokumen: HTML mandiri, Word (.doc berbasis HTML), Markdown, teks polos.
+ */
+(() => {
+  'use strict';
+  const CG = (window.CG = window.CG || {});
+
+  const DOC_CSS = `
+    body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.6;color:#111;max-width:780px;margin:0 auto;padding:32px;}
+    h1{font-size:22pt;text-align:center;margin:0 0 8pt;line-height:1.25;}
+    p.meta{text-align:center;font-style:italic;color:#444;margin:0 0 4pt;}
+    h2{font-size:11.5pt;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #999;padding-bottom:3pt;margin:20pt 0 8pt;}
+    h3{font-size:13pt;margin:14pt 0 6pt;}
+    p{margin:0 0 9pt;text-align:justify;}
+    ul,ol{margin:0 0 9pt 22pt;}
+    blockquote{margin:0 0 9pt;padding-left:12pt;border-left:3px solid #999;color:#333;font-style:italic;}
+    table{border-collapse:collapse;width:100%;margin:8pt 0;}
+    td,th{border:1px solid #999;padding:4pt 6pt;text-align:left;}
+  `;
+
+  const META_RE = /^\s*(by|oleh|date and place|tanggal)\b/i;
+
+  function cleanClone(paper) {
+    const c = paper.cloneNode(true);
+    ['contenteditable', 'spellcheck', 'id', 'class', 'role', 'aria-label', 'aria-multiline'].forEach((a) => c.removeAttribute(a));
+    c.querySelectorAll('*').forEach((el) => {
+      el.removeAttribute('style');
+      el.removeAttribute('class');
+    });
+    // tandai baris byline / tanggal setelah judul agar rapi di Word
+    const h1 = c.querySelector('h1');
+    if (h1) {
+      let n = h1.nextElementSibling;
+      let i = 0;
+      while (n && n.tagName === 'P' && i < 2 && META_RE.test(n.textContent)) {
+        n.className = 'meta';
+        n = n.nextElementSibling;
+        i++;
+      }
+    }
+    return c;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+  }
+
+  function toStandaloneHtml(paper, title) {
+    const body = cleanClone(paper).innerHTML;
+    return `<!doctype html>\n<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)}</title><style>${DOC_CSS}</style></head><body>\n${body}\n</body></html>`;
+  }
+
+  function toWordHtml(paper, title) {
+    const body = cleanClone(paper).innerHTML;
+    return (
+      '﻿<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
+      `<head><meta charset="utf-8"><title>${escapeHtml(title)}</title>` +
+      '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->' +
+      `<style>@page{size:21cm 29.7cm;margin:2.5cm 2.2cm;}${DOC_CSS}</style></head><body>\n${body}\n</body></html>`
+    );
+  }
+
+  function inlineMd(node) {
+    let out = '';
+    node.childNodes.forEach((c) => {
+      if (c.nodeType === 3) { out += c.textContent.replace(/\s+/g, ' '); return; }
+      if (c.nodeType !== 1) return;
+      const t = c.tagName;
+      const inner = inlineMd(c);
+      if (t === 'STRONG' || t === 'B') out += inner.trim() ? `**${inner.trim()}** ` : '';
+      else if (t === 'EM' || t === 'I') out += inner.trim() ? `*${inner.trim()}* ` : '';
+      else if (t === 'BR') out += '  \n';
+      else if (t === 'A') out += `[${inner}](${c.getAttribute('href') || ''})`;
+      else out += inner;
+    });
+    return out;
+  }
+
+  function toMarkdown(paper) {
+    const c = cleanClone(paper);
+    const out = [];
+    c.childNodes.forEach((node) => {
+      if (node.nodeType === 3) { const t = node.textContent.trim(); if (t) out.push(t, ''); return; }
+      if (node.nodeType !== 1) return;
+      const tag = node.tagName;
+      const text = inlineMd(node).replace(/[ \t]+/g, ' ').trim();
+      if (/^H[1-6]$/.test(tag)) out.push(`${'#'.repeat(Number(tag[1]))} ${text}`, '');
+      else if (tag === 'UL' || tag === 'OL') {
+        [...node.children].forEach((li, i) => out.push(`${tag === 'OL' ? `${i + 1}.` : '-'} ${inlineMd(li).trim()}`));
+        out.push('');
+      } else if (tag === 'BLOCKQUOTE') out.push(`> ${text}`, '');
+      else if (tag === 'TABLE') {
+        const rows = [...node.querySelectorAll('tr')].map((tr) => `| ${[...tr.children].map((x) => x.textContent.trim()).join(' | ')} |`);
+        if (rows.length) {
+          const cols = node.querySelector('tr').children.length;
+          rows.splice(1, 0, `| ${Array(cols).fill('---').join(' | ')} |`);
+          out.push(...rows, '');
+        }
+      } else if (text) out.push(text, '');
+    });
+    return out.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+  }
+
+  function blockText(el) {
+    return el.textContent.replace(/\s+/g, ' ').trim();
+  }
+
+  function toPlainText(paper) {
+    const out = [];
+    paper.childNodes.forEach((node) => {
+      if (node.nodeType === 3) {
+        const t = node.textContent.trim();
+        if (t) out.push(t, '');
+        return;
+      }
+      if (node.nodeType !== 1) return;
+      const tag = node.tagName;
+      if (tag === 'H1') {
+        const t = blockText(node);
+        out.push(t.toUpperCase(), '='.repeat(Math.min(t.length, 70)), '');
+      } else if (tag === 'H2') {
+        const t = blockText(node);
+        out.push(t.toUpperCase(), '-'.repeat(Math.min(t.length, 70)), '');
+      } else if (/^H[3-6]$/.test(tag)) {
+        out.push(blockText(node), '');
+      } else if (tag === 'UL' || tag === 'OL') {
+        [...node.children].forEach((li, i) => out.push((tag === 'OL' ? `${i + 1}. ` : '• ') + blockText(li)));
+        out.push('');
+      } else if (tag === 'BLOCKQUOTE') {
+        out.push('> ' + blockText(node), '');
+      } else if (tag === 'TABLE') {
+        node.querySelectorAll('tr').forEach((tr) => out.push([...tr.children].map(blockText).join(' | ')));
+        out.push('');
+      } else {
+        const t = blockText(node);
+        if (t) out.push(t, '');
+      }
+    });
+    return out.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+  }
+
+  function slug(s) {
+    return (
+      String(s || '')
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60) || 'catatan'
+    );
+  }
+
+  function download(content, filename, mime) {
+    const blob = content instanceof Blob ? content : new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
+  CG.exporter = { toStandaloneHtml, toWordHtml, toMarkdown, toPlainText, cleanClone, slug, download };
+})();
+
+</script>
+<script>
+/**
+ * Catatan Generator — logika klien
+ * Alur: PDF → ekstraksi teks (pdf.js, di browser) → mesin Report Writing (js/engine.js, di browser)
+ *       → kertas kerja (bisa diedit) → ekspor.
+ * Tidak ada server, tidak ada AI eksternal: teks dokumen tidak pernah meninggalkan perangkat.
+ */
+(() => {
+  'use strict';
+
+  const CG = window.CG || {};
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const PDFJS_VERSION = '4.4.168';
+  const PDFJS_URL = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.min.mjs`;
+  const PDFJS_WORKER = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.worker.min.mjs`;
+  const MAX_FILE_MB = 30;
+  const MAX_CHARS = 120000;
+  const MAX_PAGES = 250;
+  const LS = { theme: 'cg-theme', draft: 'cg-draft', opts: 'cg-opts' };
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (_) { /* abaikan */ } },
+    del(k) { try { localStorage.removeItem(k); } catch (_) { /* abaikan */ } },
+  };
+
+  const state = {
+    file: null,
+    fileState: 'idle',
+    metaText: '',
+    text: '',
+    pages: 0,
+    model: 'report-writing',
+    busy: false,
+    cancel: false,
+  };
+
+  const el = {
+    paper: $('#paper'),
+    wrap: $('#paperWrap'),
+    pill: $('#statusPill'),
+    dropzone: $('#dropzone'),
+    fileInput: $('#fileInput'),
+    fileChip: $('#fileChip'),
+    fileName: $('#fileName'),
+    fileMeta: $('#fileMeta'),
+    btnGenerate: $('#btnGenerate'),
+    btnStop: $('#btnStop'),
+    hint: $('#generateHint'),
+    fieldset: $('#controlsFieldset'),
+    toolbar: $('#toolbar'),
+    menu: $('#exportMenu'),
+    btnExport: $('#btnExport'),
+  };
+
+  /* ---------------- Util UI ---------------- */
+
+  function toast(msg, kind = 'info', ms = 4200) {
+    const t = document.createElement('div');
+    t.className = `toast${kind === 'error' ? ' is-error' : kind === 'success' ? ' is-success' : kind === 'warn' ? ' is-warn' : ''}`;
+    t.textContent = msg;
+    $('#toasts').appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 320); }, ms);
+  }
+
+  function setStatus(kind, text) {
+    el.pill.dataset.kind = kind;
+    el.pill.textContent = text;
+  }
+
+  function formatBytes(n) {
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
+    return `${(n / 1024 / 1024).toFixed(1)} MB`;
+  }
+
+  /** Sanitizer ringan untuk draf dari localStorage (buang skrip, handler on*, URL javascript:). */
+  function sanitizeHtml(html) {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = String(html);
+    tpl.content.querySelectorAll('script,style,iframe,object,embed,link,meta,form,input,button,svg,math').forEach((n) => n.remove());
+    tpl.content.querySelectorAll('*').forEach((n) => {
+      [...n.attributes].forEach((a) => {
+        if (/^on/i.test(a.name) || /^(?:javascript|data|vbscript):/i.test(a.value.trim())) n.removeAttribute(a.name);
+      });
+    });
+    return tpl.innerHTML;
+  }
+
+  /* ---------------- Tema ---------------- */
+
+  $('#btnTheme').addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    store.set(LS.theme, next);
+  });
+
+  /* ---------------- Model ---------------- */
+
+  function renderModels() {
+    const list = $('#modelList');
+    list.innerHTML = '';
+    (CG.MODELS || []).forEach((m) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'model';
+      b.dataset.id = m.id;
+      b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', String(m.id === state.model));
+      b.disabled = !m.available;
+      b.innerHTML =
+        `<span class="model-ico"><svg class="ico"><use href="#i-${esc(m.icon)}"/></svg></span>` +
+        `<span class="model-body"><span class="model-name">${esc(m.name)}</span><span class="model-tag">${esc(m.tagline)}</span></span>` +
+        (m.available ? '<span class="model-check"><svg class="ico"><use href="#i-check"/></svg></span>' : '<span class="badge">Segera</span>');
+      b.addEventListener('click', () => {
+        state.model = m.id;
+        renderModels();
+      });
+      list.appendChild(b);
+    });
+    const current = (CG.MODELS || []).find((m) => m.id === state.model);
+    const detail = $('#modelDetail');
+    if (current && current.available) {
+      detail.innerHTML =
+        `<p>${esc(current.description)}</p><div class="flow">` +
+        current.flow.map((f, i) => `${i ? '<span class="flow-arrow">→</span>' : ''}<span class="flow-chip" title="${esc(f.d)}">${esc(f.k)}</span>`).join('') +
+        '</div>';
+    } else {
+      detail.innerHTML = '';
+    }
+  }
+
+  /* ---------------- PDF ---------------- */
+
+  let pdfjsPromise;
+  function loadPdfjs() {
+    if (!pdfjsPromise) {
+      pdfjsPromise = import(PDFJS_URL).then((m) => {
+        m.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+        return m;
+      });
+    }
+    return pdfjsPromise;
+  }
+
+  async function extractPdfText(file, onProgress) {
+    const pdfjs = await loadPdfjs();
+    const buf = await file.arrayBuffer();
+    const doc = await pdfjs.getDocument({ data: new Uint8Array(buf) }).promise;
+    const total = doc.numPages;
+    const limit = Math.min(total, MAX_PAGES);
+    const pages = [];
+    for (let i = 1; i <= limit; i++) {
+      onProgress && onProgress(i, limit);
+      const page = await doc.getPage(i);
+      const content = await page.getTextContent();
+      let out = '';
+      let prev = null;
+      for (const it of content.items) {
+        if (!('str' in it)) continue;
+        if (prev) {
+          if (Math.abs(it.transform[5] - prev.transform[5]) > 2) {
+            if (!out.endsWith('\n')) out += '\n';
+          } else {
+            const gap = it.transform[4] - (prev.transform[4] + prev.width);
+            if (gap > 1 && !/\s$/.test(out) && it.str) out += ' ';
+          }
+        }
+        out += it.str;
+        if (it.hasEOL && !out.endsWith('\n')) out += '\n';
+        if (it.str) prev = it;
+      }
+      pages.push(out);
+    }
+    doc.destroy && doc.destroy();
+    const text = pages.join('\n\n').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    return { text, pages: total, truncated: total > limit };
+  }
+
+  function renderFile() {
+    const has = !!state.file;
+    el.dropzone.hidden = has;
+    el.fileChip.hidden = !has;
+    if (has) {
+      el.fileName.textContent = state.file.name;
+      el.fileMeta.textContent = state.metaText;
+      el.fileChip.dataset.state = state.fileState;
+    }
+    refreshReady();
+  }
+
+  function resetFile() {
+    state.file = null;
+    state.fileState = 'idle';
+    state.metaText = '';
+    state.text = '';
+    state.pages = 0;
+    el.fileInput.value = '';
+    renderFile();
+  }
+
+  async function handleFile(file) {
+    if (!file) return;
+    if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) {
+      toast('Hanya berkas PDF yang didukung.', 'error');
+      return;
+    }
+    if (file.size > MAX_FILE_MB * 1024 * 1024) {
+      toast(`Ukuran PDF maksimal ${MAX_FILE_MB} MB.`, 'error');
+      return;
+    }
+    resetFile();
+    state.file = file;
+    state.fileState = 'loading';
+    state.metaText = `${formatBytes(file.size)} · membaca…`;
+    renderFile();
+
+    try {
+      const { text, pages, truncated } = await extractPdfText(file, (p, t) => {
+        el.fileMeta.textContent = `${formatBytes(file.size)} · membaca halaman ${p}/${t}…`;
+      });
+      state.pages = pages;
+      state.text = text;
+      const chars = text.replace(/\s/g, '').length;
+      if (chars < 200) {
+        state.fileState = 'error';
+        state.metaText = 'PDF ini tidak memiliki teks (kemungkinan hasil pindaian/gambar). Generator hanya membaca PDF berteks.';
+      } else {
+        state.fileState = 'ready';
+        const clipped = text.length > MAX_CHARS ? ` · dibaca ${MAX_CHARS.toLocaleString('id-ID')} karakter pertama` : '';
+        state.metaText = `${formatBytes(file.size)} · ${pages} hlm · ${text.length.toLocaleString('id-ID')} karakter${truncated ? ` · hanya ${MAX_PAGES} hlm pertama` : ''}${clipped}`;
+      }
+    } catch (err) {
+      console.error(err);
+      state.fileState = 'error';
+      state.metaText = 'Gagal membaca PDF. Berkas mungkin rusak atau berpassword, atau pustaka pembaca PDF belum termuat (butuh internet saat pertama kali).';
+    }
+    renderFile();
+  }
+
+  el.fileInput.addEventListener('change', (e) => handleFile(e.target.files && e.target.files[0]));
+  $('#btnRemoveFile').addEventListener('click', resetFile);
+  ['dragenter', 'dragover'].forEach((ev) =>
+    el.dropzone.addEventListener(ev, (e) => { e.preventDefault(); el.dropzone.classList.add('is-drag'); }));
+  ['dragleave', 'drop'].forEach((ev) =>
+    el.dropzone.addEventListener(ev, (e) => { e.preventDefault(); el.dropzone.classList.remove('is-drag'); }));
+  el.dropzone.addEventListener('drop', (e) => handleFile(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]));
+  ['dragover', 'drop'].forEach((ev) => window.addEventListener(ev, (e) => { if (!e.target.closest || !e.target.closest('#dropzone')) e.preventDefault(); }));
+
+  function ready() {
+    return !!state.file && state.fileState === 'ready' && state.text.trim().length >= 50;
+  }
+
+  function refreshReady() {
+    el.btnGenerate.disabled = state.busy || !ready();
+    el.hint.innerHTML = ready()
+      ? 'Siap · <kbd>Ctrl</kbd> + <kbd>Enter</kbd>'
+      : state.file && state.fileState === 'loading' ? 'Membaca PDF…' : 'Unggah PDF terlebih dahulu';
+  }
+
+  /* ---------------- Opsi ---------------- */
+
+  function readOptions() {
+    return {
+      author: $('#optAuthor').value.trim(),
+      datePlace: $('#optDatePlace').value.trim(),
+      language: $('#optLang').value,
+      length: ($('input[name="length"]:checked') || {}).value || 'medium',
+      notes: $('#optNotes').value.trim(),
+    };
+  }
+
+  function loadOptions() {
+    try {
+      const o = JSON.parse(store.get(LS.opts) || '{}');
+      if (o.author) $('#optAuthor').value = o.author;
+      if (o.language) $('#optLang').value = o.language;
+      if (o.length) { const r = $(`input[name="length"][value="${o.length}"]`); if (r) r.checked = true; }
+    } catch (_) { /* abaikan */ }
+  }
+
+  function saveOptions() {
+    const o = readOptions();
+    store.set(LS.opts, JSON.stringify({ author: o.author, language: o.language, length: o.length }));
+  }
+  $('#optionsForm').addEventListener('change', saveOptions);
+  $('#optAuthor').addEventListener('input', saveOptions);
+
+  /* ---------------- Kertas kerja ---------------- */
+
+  function updateEmpty() {
+    const empty = !el.paper.textContent.trim() && !el.paper.querySelector('table,img');
+    if (empty && el.paper.innerHTML) el.paper.innerHTML = '';
+    el.wrap.dataset.empty = String(empty);
+  }
+
+  function setEditable(on) {
+    el.paper.contentEditable = String(on);
+    $$('button', el.toolbar).forEach((b) => { b.disabled = !on; });
+  }
+
+  function saveDraft() {
+    if (!el.paper.textContent.trim()) { store.del(LS.draft); return; }
+    store.set(LS.draft, JSON.stringify({ html: el.paper.innerHTML, ts: Date.now() }));
+  }
+
+  /* ---------------- Final Check ---------------- */
+
+  const FIRST_PERSON = /\b(?:we|my|our|ours|saya|aku|kami|kita)\b|\bI(?:['’](?:m|d|ll|ve)|\s+(?:am|was|have|had|will|would|can|could|think|believe|feel|saw|went|did|do))\b/gi;
+  const STRUCT = [
+    { key: 'title', label: 'Judul' },
+    { key: 'byline', label: 'Byline' },
+    { key: 'dateplace', label: 'Tanggal & Tempat' },
+    { key: 'intro', label: 'Pendahuluan' },
+    { key: 'body', label: 'Rincian' },
+    { key: 'conclusion', label: 'Kesimpulan' },
+  ];
+
+  function setTile(name, stateName, note) {
+    const tile = $(`.fc-tile[data-check="${name}"]`);
+    tile.dataset.state = stateName;
+    if (note != null) $('.fc-note', tile).textContent = note;
+  }
+
+  function runChecks() {
+    const text = (el.paper.innerText || el.paper.textContent || '').trim();
+    const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
+    const paras = $$('p', el.paper).filter((p) => p.textContent.trim()).length;
+    $('#statWords').textContent = words.toLocaleString('id-ID');
+    $('#statParas').textContent = String(paras);
+    $('#statRead').textContent = String(words ? Math.max(1, Math.ceil(words / 200)) : 0);
+
+    if (!words) {
+      ['title', 'language', 'organised'].forEach((n) => setTile(n, 'idle', 'Menunggu isi'));
+      setTile('facts', 'idle', 'Cocokkan dengan PDF, lalu centang');
+      $('#fcChips').innerHTML = '';
+      $('#fcSummary').textContent = 'Belum ada isi';
+      return;
+    }
+
+    // 1) Judul
+    const h1 = $('h1', el.paper);
+    const hw = h1 ? h1.textContent.trim().split(/\s+/).filter(Boolean).length : 0;
+    if (hw >= 3 && hw <= 20) setTile('title', 'ok', 'Judul jelas dan spesifik');
+    else if (!h1) setTile('title', 'warn', 'Tambahkan judul (H1) yang menjelaskan isi laporan');
+    else setTile('title', 'warn', hw < 3 ? 'Judul terlalu singkat' : 'Judul terlalu panjang');
+
+    // 2) Fakta (manual)
+    const factsOk = $('#chkFacts').checked;
+    setTile('facts', factsOk ? 'ok' : 'idle', factsOk ? 'Sudah dicocokkan dengan PDF' : 'Cocokkan dengan PDF, lalu centang');
+
+    // 3) Bahasa formal: tanpa kata ganti orang pertama
+    const found = {};
+    (text.match(FIRST_PERSON) || []).forEach((w) => { const k = w.toLowerCase(); found[k] = (found[k] || 0) + 1; });
+    const keys = Object.keys(found);
+    if (!keys.length) setTile('language', 'ok', 'Tanpa kata ganti orang pertama');
+    else setTile('language', 'warn', 'Ditemukan: ' + keys.slice(0, 4).map((k) => `${k} ×${found[k]}`).join(', ') + ' — ubah ke orang ketiga');
+
+    // 4) Struktur & kerapian
+    const h2s = $$('h2', el.paper).map((h) => h.textContent.trim());
+    const has = {
+      title: !!h1,
+      byline: /(^|\n)\s*(by|oleh)\s*:/i.test(text),
+      dateplace: /(date and place|tanggal\s*(dan|&)\s*tempat)\s*:/i.test(text),
+      intro: h2s.some((t) => /(introduction|pendahuluan|pembukaan)/i.test(t)),
+      conclusion: h2s.some((t) => /(conclusion|kesimpulan|penutup)/i.test(t)),
+      body: h2s.some((t) => !/(introduction|pendahuluan|pembukaan|conclusion|kesimpulan|penutup)/i.test(t)),
+    };
+    $('#fcChips').innerHTML = STRUCT.map((s) => `<span class="chip ${has[s.key] ? 'is-ok' : 'is-miss'}">${esc(s.label)}</span>`).join('');
+    const missing = STRUCT.filter((s) => !has[s.key]).map((s) => s.label);
+    const ps = $$('p', el.paper).map((p) => p.textContent.trim().split(/\s+/).filter(Boolean).length).filter(Boolean);
+    const avg = ps.length ? ps.reduce((a, b) => a + b, 0) / ps.length : 0;
+    if (!missing.length && avg <= 110) setTile('organised', 'ok', 'Struktur lengkap, paragraf ringkas');
+    else if (missing.length) setTile('organised', 'warn', 'Belum ada: ' + missing.join(', '));
+    else setTile('organised', 'warn', 'Paragraf terlalu panjang — pecah menjadi lebih pendek');
+
+    const okCount = $$('.fc-tile').filter((t) => t.dataset.state === 'ok').length;
+    $('#fcSummary').textContent = `${okCount}/4 lolos`;
+  }
+
+  let debounce;
+  function onInput() {
+    updateEmpty();
+    clearTimeout(debounce);
+    debounce = setTimeout(() => { runChecks(); saveDraft(); }, 300);
+  }
+
+  el.paper.addEventListener('input', onInput);
+  $('#chkFacts').addEventListener('change', runChecks);
+  el.paper.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const t = (e.clipboardData || window.clipboardData).getData('text/plain');
+    document.execCommand('insertText', false, t);
+  });
+
+  /* ---------------- Toolbar ---------------- */
+
+  el.toolbar.addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
+  el.toolbar.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-cmd]');
+    if (!b || state.busy) return;
+    el.paper.focus();
+    const c = b.dataset.cmd;
+    if (['h1', 'h2', 'h3', 'p', 'blockquote'].includes(c)) {
+      const cur = (document.queryCommandValue('formatBlock') || '').toLowerCase().replace(/[<>]/g, '');
+      document.execCommand('formatBlock', false, `<${c !== 'p' && cur === c ? 'p' : c}>`);
+    } else if (c === 'ul') document.execCommand('insertUnorderedList');
+    else if (c === 'ol') document.execCommand('insertOrderedList');
+    else document.execCommand(c);
+    onInput();
+    syncToolbar();
+  });
+
+  function syncToolbar() {
+    const sel = window.getSelection();
+    if (!sel || !sel.anchorNode || !el.paper.contains(sel.anchorNode)) return;
+    const block = (document.queryCommandValue('formatBlock') || '').toLowerCase().replace(/[<>]/g, '');
+    $$('button[data-cmd]', el.toolbar).forEach((b) => {
+      const c = b.dataset.cmd;
+      let on = false;
+      if (['bold', 'italic', 'underline'].includes(c)) on = document.queryCommandState(c);
+      else if (['h1', 'h2', 'h3', 'blockquote'].includes(c)) on = block === c;
+      else if (c === 'ul') on = document.queryCommandState('insertUnorderedList');
+      else if (c === 'ol') on = document.queryCommandState('insertOrderedList');
+      b.setAttribute('aria-pressed', String(on));
+    });
+  }
+  document.addEventListener('selectionchange', syncToolbar);
+
+  /* ---------------- Generate ---------------- */
+
+  function setBusy(b) {
+    state.busy = b;
+    el.fieldset.disabled = b;
+    el.btnGenerate.hidden = b;
+    el.btnStop.hidden = !b;
+    el.paper.classList.toggle('is-writing', b);
+    setEditable(!b);
+    refreshReady();
+  }
+
+  const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  /** Menampilkan hasil bertahap (efek menulis). Mengembalikan false bila dihentikan. */
+  async function typeOut(blocks) {
+    const E = CG.engine;
+    const total = E.size(blocks);
+    const frames = Math.min(110, Math.max(30, Math.round(total / 18)));
+    const step = Math.ceil(total / frames);
+    for (let n = step; n < total; n += step) {
+      if (state.cancel) return false;
+      el.paper.innerHTML = E.toHtml(E.partial(blocks, n));
+      el.wrap.dataset.empty = 'false';
+      await nextFrame();
+    }
+    return !state.cancel;
+  }
+
+  async function generate() {
+    if (state.busy || !ready()) return;
+    if (!CG.engine) { toast('Mesin penulis belum termuat. Muat ulang halaman.', 'error'); return; }
+    if (el.paper.textContent.trim() && !confirm('Isi kertas kerja saat ini akan diganti hasil baru. Lanjutkan?')) return;
+
+    const prevHtml = el.paper.innerHTML;
+    state.cancel = false;
+    setBusy(true);
+    setStatus('writing', 'Menyusun');
+    $('#chkFacts').checked = false;
+    el.paper.innerHTML = '';
+    el.wrap.dataset.empty = 'false';
+    if (window.matchMedia('(max-width: 980px)').matches) el.wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    try {
+      await wait(60); // beri kesempatan UI menampilkan status "Menyusun"
+      const result = CG.engine.generate({
+        text: state.text.slice(0, MAX_CHARS),
+        fileName: state.file.name,
+        pages: state.pages,
+        options: readOptions(),
+      });
+      const finished = await typeOut(result.blocks);
+      if (!finished) {
+        el.paper.innerHTML = prevHtml;
+        setStatus('idle', 'Dihentikan');
+        toast('Penyusunan dihentikan.');
+      } else {
+        el.paper.innerHTML = CG.engine.toHtml(result.blocks);
+        setStatus('done', 'Selesai');
+        toast('Catatan selesai disusun. Silakan edit dan cocokkan faktanya dengan PDF.', 'success');
+        if (result.notes.length) setTimeout(() => toast(result.notes[0], 'warn', 7000), 900);
+      }
+    } catch (err) {
+      console.error(err);
+      el.paper.innerHTML = prevHtml;
+      setStatus('error', 'Gagal');
+      toast(err.message || 'Terjadi galat saat menyusun catatan.', 'error', 7000);
+    } finally {
+      setBusy(false);
+      updateEmpty();
+      runChecks();
+      saveDraft();
+    }
+  }
+
+  el.btnGenerate.addEventListener('click', () => generate());
+  el.btnStop.addEventListener('click', () => { state.cancel = true; });
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); generate(); }
+    if (e.key === 'Escape') closeMenu();
+  });
+
+  /* ---------------- Ekspor ---------------- */
+
+  function docTitle() {
+    const h1 = $('h1', el.paper);
+    return (h1 && h1.textContent.trim()) || (state.file && state.file.name.replace(/\.pdf$/i, '')) || 'Catatan';
+  }
+
+  function hasContent() {
+    if (!el.paper.textContent.trim()) { toast('Kertas kerja masih kosong.', 'warn'); return false; }
+    return true;
+  }
+
+  function closeMenu() { el.menu.hidden = true; el.btnExport.setAttribute('aria-expanded', 'false'); }
+  el.btnExport.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = el.menu.hidden;
+    el.menu.hidden = !open;
+    el.btnExport.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', (e) => { if (!e.target.closest('.menu-wrap')) closeMenu(); });
+
+  el.menu.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-export]');
+    if (!b) return;
+    closeMenu();
+    if (!hasContent()) return;
+    const X = CG.exporter;
+    const title = docTitle();
+    const base = X.slug(title);
+    switch (b.dataset.export) {
+      case 'pdf': {
+        const prev = document.title;
+        document.title = title;
+        const restore = () => { document.title = prev; window.removeEventListener('afterprint', restore); };
+        window.addEventListener('afterprint', restore);
+        window.print();
+        break;
+      }
+      case 'doc': X.download(X.toWordHtml(el.paper, title), `${base}.doc`, 'application/msword'); toast('Berkas Word diunduh.', 'success'); break;
+      case 'md': X.download(X.toMarkdown(el.paper), `${base}.md`, 'text/markdown;charset=utf-8'); toast('Berkas Markdown diunduh.', 'success'); break;
+      case 'html': X.download(X.toStandaloneHtml(el.paper, title), `${base}.html`, 'text/html;charset=utf-8'); toast('Berkas HTML diunduh.', 'success'); break;
+      case 'txt': X.download(X.toPlainText(el.paper), `${base}.txt`, 'text/plain;charset=utf-8'); toast('Berkas teks diunduh.', 'success'); break;
+      default: break;
+    }
+  });
+
+  $('#btnCopy').addEventListener('click', async () => {
+    if (!hasContent()) return;
+    const X = CG.exporter;
+    const plain = X.toPlainText(el.paper);
+    const html = X.cleanClone(el.paper).innerHTML;
+    try {
+      if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+        await navigator.clipboard.write([new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([plain], { type: 'text/plain' }),
+        })]);
+      } else {
+        await navigator.clipboard.writeText(plain);
+      }
+      toast('Isi disalin ke papan klip.', 'success');
+    } catch (_) {
+      toast('Tidak dapat menyalin otomatis. Pilih teks lalu salin manual.', 'error');
+    }
+  });
+
+  $('#btnClear').addEventListener('click', () => {
+    if (state.busy) return;
+    if (el.paper.textContent.trim() && !confirm('Kosongkan kertas kerja? Isi yang belum diunduh akan hilang.')) return;
+    el.paper.innerHTML = '';
+    $('#chkFacts').checked = false;
+    store.del(LS.draft);
+    setStatus('idle', 'Siap');
+    updateEmpty();
+    runChecks();
+  });
+
+  /* ---------------- Init ---------------- */
+
+  function init() {
+    try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (_) { /* abaikan */ }
+    renderModels();
+    loadOptions();
+    renderFile();
+    try {
+      const d = JSON.parse(store.get(LS.draft) || 'null');
+      if (d && d.html) {
+        el.paper.innerHTML = sanitizeHtml(d.html);
+        setStatus('idle', 'Draf dipulihkan');
+        toast('Draf terakhir dipulihkan.');
+      }
+    } catch (_) { /* abaikan */ }
+    updateEmpty();
+    runChecks();
+  }
+
+  init();
+})();
+
+</script>
 </body>
 </html>
