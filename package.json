@@ -1,9 +1,0 @@
-{
-  "name": "catatan-generator",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Ubah PDF menjadi laporan (Report Writing) langsung di browser, tanpa AI dan tanpa server.",
-  "scripts": {
-    "check": "node --check public/js/engine.js && node --check public/js/models.js && node --check public/js/export.js && node --check public/js/app.js"
-  }
-}
