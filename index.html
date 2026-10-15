@@ -80,6 +80,8 @@ input[type=text],select,textarea{width:100%;padding:11px 13px;border:2px solid v
 .ghost-hint{margin:6px 0 0;text-align:center;color:#4a4378;font-size:15px;line-height:1.5;font-family:var(--f)}
 .footer{max-width:1180px;margin:auto;padding:0 18px 30px;text-align:center;color:var(--muted);font-size:13px}
 .toasts{position:fixed;left:12px;right:12px;bottom:max(14px,env(safe-area-inset-bottom));z-index:60;display:grid;gap:8px;justify-items:center;pointer-events:none}.toast{max-width:460px;background:var(--ink);color:var(--bg);border:2px solid var(--ink);border-radius:14px;padding:11px 16px;font-weight:600;box-shadow:4px 4px 0 var(--pink);animation:pop .25s}.toast.is-success{box-shadow:4px 4px 0 var(--mint)}.toast.is-warn{box-shadow:4px 4px 0 var(--lemon)}.toast.is-error{box-shadow:4px 4px 0 #ff4d4d}@keyframes pop{from{transform:translateY(10px) scale(.96);opacity:0}}
+.paper ul{margin:0 0 10px;padding-left:22px}.paper table.cornell{table-layout:fixed;margin:10px 0 6px}.cornell th{background:#1b1840;color:#fff;text-align:left;font-family:var(--f)}.cornell td{vertical-align:top}.cornell td:first-child{width:32%;background:#f1eeff;font-family:var(--f);font-weight:700}.cornell td ul{margin:0;padding-left:18px}.paper svg{max-width:100%}
+.sample-paper svg{width:100%;height:auto}.sample-paper table{font-size:11px;border-collapse:collapse;width:100%}.sample-paper td,.sample-paper th{border:1.5px solid #1b1840;padding:2px 5px;vertical-align:top}.sample-paper ul{margin:0;padding-left:14px}.sample-paper td:first-child{background:#f1eeff;font-weight:700;width:32%}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @page{margin:2cm}
 @media print{body{background:#fff}.no-print,.topbar,.footer,.toasts{display:none!important}.app{padding:0;max-width:none}.workspace{display:block}.paper{border:0;box-shadow:none;padding:0;min-height:0;background:none;font-size:12pt}.empty-state{display:none}.paper-wrap[data-empty=true] .paper{opacity:1}}
@@ -355,9 +357,17 @@ window.CG.MODELS = [
       { k: 'Kesimpulan', d: 'Ringkasan peristiwa atau hasil' },
     ],
   },
-  { id: 'cornell', name: 'Cornell Notes', tagline: 'Isyarat, catatan, ringkasan', icon: 'cornell', available: false },
+  {
+    id: 'cornell', name: 'Cornell Notes', tagline: 'Pertanyaan kunci, catatan, ringkasan', icon: 'cornell', available: true,
+    description: 'Catatan dua kolom: pertanyaan kunci di kiri, poin catatan di kanan, lalu ringkasan di bawah. Cocok untuk belajar dan menghadapi ujian.',
+    flow: [{ k: 'Judul', d: 'Topik catatan' }, { k: 'Pertanyaan kunci', d: 'Kolom kiri' }, { k: 'Catatan', d: 'Kolom kanan' }, { k: 'Ringkasan', d: 'Inti dalam beberapa kalimat' }],
+  },
   { id: 'outline', name: 'Outline Bertingkat', tagline: 'Poin utama dan sub-poin', icon: 'outline', available: false },
-  { id: 'mindmap', name: 'Peta Konsep', tagline: 'Hubungan antar-gagasan', icon: 'mindmap', available: false },
+  {
+    id: 'mindmap', name: 'Mind Map', tagline: 'Peta visual cabang gagasan', icon: 'mindmap', available: true,
+    description: 'Gambar peta pikiran: judul di tengah, cabang topik berwarna, dan kata kunci di ujungnya, plus rincian singkat tiap cabang. Gambar ikut tercetak lewat PDF.',
+    flow: [{ k: 'Pusat', d: 'Judul dokumen' }, { k: 'Cabang', d: 'Topik utama' }, { k: 'Kata kunci', d: 'Ranting' }, { k: 'Rincian', d: 'Penjelasan singkat' }],
+  },
   { id: 'summary', name: 'Ringkasan Cepat', tagline: 'Inti dalam satu halaman', icon: 'summary', available: false },
 ];
 
@@ -376,6 +386,14 @@ window.CG.SAMPLES = {
     { t: 'p', v: 'Kegiatan berjalan lancar dan mencapai tujuannya. Antusiasme peserta menunjukkan bahwa kegiatan serupa layak dilanjutkan.' },
   ],
 };
+
+window.CG.SAMPLE_TEXT = `Kegiatan Bersih Kampus
+Latar Belakang
+Kegiatan bersih kampus diadakan karena sampah plastik menumpuk di area parkir dan kantin. Mahasiswa Fakultas Teknik membentuk delapan kelompok kerja. Tujuan kegiatan ini adalah menumbuhkan kepedulian mahasiswa terhadap kebersihan lingkungan.
+Pelaksanaan
+Kegiatan berlangsung pada 12 Oktober 2026 dengan 85 peserta. Setiap kelompok membersihkan satu area kampus selama tiga jam. Sampah dipilah menjadi plastik, kertas, dan organik. Total sampah yang terkumpul mencapai 140 kilogram.
+Hasil dan Tindak Lanjut
+Petugas kebersihan menerima seluruh sampah untuk diolah lebih lanjut. Panitia menyiapkan tempat sampah terpilah di kantin. Kegiatan ini akan dilaksanakan setiap semester.`;
 
 </script>
 <script>
@@ -480,7 +498,7 @@ window.CG.SAMPLES = {
       .replace(/[ \t]+/g, ' ');
   }
 
-  const KNOWN_HEAD = /^(pendahuluan|penutup|kesimpulan|simpulan|abstrak|latar belakang|tujuan|metode|metodologi|hasil|pembahasan|saran|rekomendasi|agenda|jadwal|rincian|uraian|kegiatan|introduction|background|methods?|methodology|results?|discussion|conclusions?|summary|recommendations?|agenda|schedule|overview|objectives?)(?:\s+(?:dan|and|&)\s+\p{L}+)?$/iu;
+  const KNOWN_HEAD = /^(pendahuluan|penutup|kesimpulan|simpulan|abstrak|latar belakang|pelaksanaan|temuan|analisis|implementasi|tinjauan pustaka|landasan teori|tujuan|metode|metodologi|hasil|pembahasan|saran|rekomendasi|agenda|jadwal|rincian|uraian|kegiatan|introduction|background|methods?|methodology|results?|discussion|conclusions?|summary|recommendations?|agenda|schedule|overview|objectives?)(?:\s+(?:dan|and|&)\s+\p{L}+)?$/iu;
 
   function isHeading(line, next) {
     if (line.length > 90 || line.length < 3) return false;
@@ -946,6 +964,132 @@ window.CG.SAMPLES = {
     return { date, place: loc ? loc[1].trim() : '' };
   }
 
+
+  /* ====================== Cornell Notes & Mind Map ====================== */
+
+  const ink = (n) => n.replace(/\s+/g, ' ').trim();
+  const plain = (html) => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const clip = (t, n) => (t.length > n ? `${t.slice(0, n - 1).trim()}…` : t);
+
+  function groupsOf(c, k) {
+    const named = c.sections.filter((x) => x.h);
+    if (named.length >= 2) {
+      let g = named;
+      if (g.length > k) {
+        g = g.map((x, i) => ({ x, i, v: x.sents.reduce((a, b) => a + b.score, 0) / Math.sqrt(x.sents.length) }))
+          .sort((a, b) => b.v - a.v).slice(0, k).sort((a, b) => a.i - b.i).map((r) => r.x);
+      }
+      return g.map((x) => ({ h: x.h, sents: x.sents }));
+    }
+    const n = Math.min(k, Math.max(2, Math.round(c.all.length / 4)));
+    const size = Math.ceil(c.all.length / n);
+    const g = [];
+    for (let i = 0; i < c.all.length; i += size) g.push({ h: null, sents: c.all.slice(i, i + size) });
+    return g;
+  }
+
+  function keyWords(g, c, n) {
+    const kw = keywordsOf(g.sents.map((x) => x.text), c.sourceLang, n, c.titleWords);
+    if (kw.length >= Math.min(2, n)) return kw.map(capFirst);
+    const stop = buildStop(c.sourceLang);
+    const out = [];
+    [...g.sents].sort((a, b) => b.score - a.score).forEach((x) => {
+      const w = x.toks.filter((t) => t.length > 4 && !stop.has(t) && !GENERIC_WORDS.has(t) && !out.includes(capFirst(t))).sort((a, b) => b.length - a.length)[0];
+      if (w && out.length < n) out.push(capFirst(w));
+    });
+    return out;
+  }
+
+  function topSents(g, n) {
+    return [...g.sents].sort((a, b) => b.score - a.score).slice(0, n).sort((a, b) => a.idx - b.idx);
+  }
+
+  function buildCornell(c) {
+    const { lang, opt, all, docTitle } = c;
+    const k = { short: 3, medium: 5, long: 7 }[opt.length] || 5;
+    const per = { short: 2, medium: 3, long: 4 }[opt.length] || 3;
+    const L = lang === 'id'
+      ? { cue: 'Pertanyaan kunci', notes: 'Catatan', sum: 'Ringkasan', name: 'Nama', date: 'Tanggal', ttl: 'Catatan Cornell', q: (x) => `Apa yang dibahas tentang ${x}?` }
+      : { cue: 'Cue questions', notes: 'Notes', sum: 'Summary', name: 'Name', date: 'Date', ttl: 'Cornell Notes', q: (x) => `What is covered about ${x}?` };
+    const gs = groupsOf(c, k);
+    const rows = gs.map((g, i) => {
+      const label = g.h ? capFirst(g.h) : (keyWords(g, c, 1)[0] || `${lang === 'id' ? 'Bagian' : 'Part'} ${i + 1}`);
+      return { cue: L.q(label), notes: topSents(g, per).map((x) => x.text) };
+    });
+    const html = `<table class="cornell"><thead><tr><th>${L.cue}</th><th>${L.notes}</th></tr></thead><tbody>` +
+      rows.map((r) => `<tr><td>${esc(r.cue)}</td><td><ul>${r.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul></td></tr>`).join('') + '</tbody></table>';
+    const used = new Set(rows.flatMap((_, i) => topSents(gs[i], per).map((x) => x.idx)));
+    const sum = [...all].filter((x) => !used.has(x.idx)).sort((a, b) => b.score - a.score).slice(0, 2).sort((a, b) => a.idx - b.idx).map((x) => x.text);
+    const fallback = sum.length ? sum : all.slice(-2).map((x) => x.text);
+    const blocks = [{ t: 'h1', v: `${L.ttl}: ${docTitle}` }];
+    if (opt.author) blocks.push({ t: 'meta', label: `${L.name}:`, v: opt.author });
+    const when = opt.datePlace || (c.found ? c.found.date : '');
+    if (when) blocks.push({ t: 'meta', label: `${L.date}:`, v: when });
+    blocks.push({ t: 'raw', html, v: plain(html) }, { t: 'h2', v: L.sum }, { t: 'p', v: fallback.join(' ') });
+    return { blocks, lang, notes: c.notes };
+  }
+
+  function wrapLabel(t, max) {
+    const words = ink(t).split(' ');
+    const lines = [''];
+    words.forEach((w) => {
+      const cur = lines[lines.length - 1];
+      if ((cur + ' ' + w).trim().length <= max || !cur) lines[lines.length - 1] = (cur + ' ' + w).trim();
+      else lines.push(w);
+    });
+    return lines.slice(0, 2).map((l, i, a) => (i === 1 && words.join(' ').length > a.join(' ').length + 1 ? clip(l + '…', max) : l));
+  }
+
+  function pill(x, y, label, o) {
+    const lines = wrapLabel(label, o.max);
+    const w = Math.max(...lines.map((l) => l.length)) * o.cw + 22;
+    const h = lines.length * 16 + 12;
+    return `<g><rect x="${(x - w / 2).toFixed(1)}" y="${(y - h / 2).toFixed(1)}" width="${w.toFixed(1)}" height="${h}" rx="${Math.min(18, h / 2)}" fill="${o.fill}" stroke="#1d1545" stroke-width="2.4"/>` +
+      lines.map((l, i) => `<text x="${x.toFixed(1)}" y="${(y - (lines.length - 1) * 8 + i * 16 + 5).toFixed(1)}" text-anchor="middle" font-size="${o.fs}" font-weight="${o.fw}" fill="${o.tx}">${esc(l)}</text>`).join('') + '</g>';
+  }
+
+  function buildMindmap(c) {
+    const { lang, opt, docTitle } = c;
+    const k = { short: 4, medium: 5, long: 6 }[opt.length] || 5;
+    const gs = groupsOf(c, k);
+    const COL = ['#ff6fb1', '#8c8cff', '#6befc4', '#ffe45c', '#ff9a3d', '#c9a2ff'];
+    const cx = 400, cy = 320;
+    let lines = '';
+    let nodes = '';
+    const detail = [];
+    gs.forEach((g, i) => {
+      const a = -Math.PI / 2 + (i * 2 * Math.PI) / gs.length;
+      const col = COL[i % COL.length];
+      const label = g.h ? capFirst(g.h) : (keyWords(g, c, 1)[0] || `${lang === 'id' ? 'Bagian' : 'Part'} ${i + 1}`);
+      const bx = cx + 170 * Math.cos(a);
+      const by = cy + 150 * Math.sin(a);
+      lines += `<path d="M${cx} ${cy} Q${(cx + bx) / 2} ${(cy + by) / 2 - 14} ${bx.toFixed(1)} ${by.toFixed(1)}" stroke="${col}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+      const leaves = keyWords(g, c, 3).filter((l) => l.toLowerCase() !== label.toLowerCase()).slice(0, 3);
+      leaves.forEach((lf, j) => {
+        const la = a + (j - (leaves.length - 1) / 2) * 0.36;
+        const lx = cx + 305 * Math.cos(la);
+        const ly = cy + 262 * Math.sin(la);
+        lines += `<path d="M${bx.toFixed(1)} ${by.toFixed(1)} Q${((bx + lx) / 2).toFixed(1)} ${((by + ly) / 2 - 8).toFixed(1)} ${lx.toFixed(1)} ${ly.toFixed(1)}" stroke="${col}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+        nodes += pill(lx, ly, lf, { max: 14, cw: 7, fs: 12.5, fw: 600, fill: '#ffffff', tx: '#1d1545' });
+      });
+      nodes += pill(bx, by, label, { max: 16, cw: 8, fs: 14, fw: 800, fill: col, tx: '#1d1545' });
+      detail.push({ label, sents: topSents(g, opt.length === 'short' ? 1 : 2).map((x) => x.text) });
+    });
+    const centre = pill(cx, cy, clip(docTitle, 46), { max: 18, cw: 9, fs: 16, fw: 800, fill: '#1d1545', tx: '#ffffff' });
+    const svg = `<svg viewBox="0 0 800 640" role="img" aria-label="${esc(lang === 'id' ? 'Peta konsep' : 'Mind map')}" font-family="Bricolage Grotesque, system-ui, sans-serif" style="width:100%;height:auto;display:block;margin:6px 0 16px">${lines}${nodes}${centre}</svg>`;
+    const ul = `<ul>${detail.map((d) => `<li><strong>${esc(d.label)}:</strong> ${esc(d.sents.join(' '))}</li>`).join('')}</ul>`;
+    return {
+      blocks: [
+        { t: 'h1', v: `${lang === 'id' ? 'Peta Konsep' : 'Mind Map'}: ${docTitle}` },
+        { t: 'raw', html: svg, v: plain(svg) },
+        { t: 'h2', v: lang === 'id' ? 'Rincian cabang' : 'Branch details' },
+        { t: 'raw', html: ul, v: plain(ul) },
+      ],
+      lang,
+      notes: c.notes,
+    };
+  }
+
   /* ====================== Susun laporan ====================== */
 
   function listJoin(items, lang) {
@@ -963,7 +1107,7 @@ window.CG.SAMPLES = {
     return base === base.toLowerCase() ? titleCase(base) : base;
   }
 
-  function generate({ text, fileName, pages, options }) {
+  function generate({ text, fileName, pages, options, model }) {
     const opt = options || {};
     const lang = opt.language && opt.language !== 'auto' ? opt.language : detectLanguage(text);
     const L = LABELS[lang];
@@ -1004,6 +1148,11 @@ window.CG.SAMPLES = {
     else h1 = `Report on ${docTitle}`;
     h1 = h1.replace(/[.\s]+$/, '');
     if (!rawTitle) notes.push('Judul diambil dari nama berkas karena judul dokumen tidak terdeteksi. Ganti dengan judul yang lebih spesifik.');
+
+    if (model === 'cornell' || model === 'mindmap') {
+      const ctx = { sections, all, lang, sourceLang, opt: { ...opt }, notes, found: detectDatePlace(text), docTitle: rawTitle || stemName(fileName), titleWords: new Set(tokens(rawTitle || stemName(fileName))) };
+      return model === 'cornell' ? buildCornell(ctx) : buildMindmap(ctx);
+    }
 
     /* --- byline, tanggal & tempat --- */
     const by = opt.author || PLACEHOLDER[lang].by;
@@ -1098,6 +1247,7 @@ window.CG.SAMPLES = {
 
   function toHtml(blocks) {
     return blocks.map((b) => {
+      if (b.t === 'raw') return b.html;
       if (b.t === 'meta') return `<p><strong>${esc(b.label)}</strong> ${esc(b.v)}</p>`;
       return `<${b.t}>${esc(b.v)}</${b.t}>`;
     }).join('\n');
@@ -1110,6 +1260,7 @@ window.CG.SAMPLES = {
     for (const b of blocks) {
       if (left <= 0) break;
       const len = (b.label ? b.label.length + 1 : 0) + b.v.length;
+      if (b.t === 'raw') { if (len <= left) { out.push(b); left -= len; continue; } break; }
       if (len <= left) { out.push(b); left -= len; continue; }
       if (b.label) {
         if (left <= b.label.length) { out.push({ ...b, label: b.label.slice(0, left), v: '' }); }
@@ -1213,6 +1364,7 @@ window.CG.SAMPLES = {
       if (node.nodeType === 3) { const t = node.textContent.trim(); if (t) out.push(t, ''); return; }
       if (node.nodeType !== 1) return;
       const tag = node.tagName;
+      if (tag === 'svg' || tag === 'SVG') return;
       const text = inlineMd(node).replace(/[ \t]+/g, ' ').trim();
       if (/^H[1-6]$/.test(tag)) out.push(`${'#'.repeat(Number(tag[1]))} ${text}`, '');
       else if (tag === 'UL' || tag === 'OL') {
@@ -1245,6 +1397,7 @@ window.CG.SAMPLES = {
       }
       if (node.nodeType !== 1) return;
       const tag = node.tagName;
+      if (tag === 'svg' || tag === 'SVG') return;
       if (tag === 'H1') {
         const t = blockText(node);
         out.push(t.toUpperCase(), '='.repeat(Math.min(t.length, 70)), '');
@@ -1423,7 +1576,10 @@ window.CG.SAMPLES = {
     const current = (CG.MODELS || []).find((m) => m.id === state.model);
     const detail = $('#modelDetail');
     if (current && current.available) {
-      const sample = (CG.SAMPLES || {})[current.id];
+      let sample = (CG.SAMPLES || {})[current.id];
+      if (!sample && CG.engine && CG.SAMPLE_TEXT) {
+        try { sample = CG.engine.generate({ text: CG.SAMPLE_TEXT, fileName: 'contoh.pdf', pages: 2, model: current.id, options: { length: 'short', language: 'id', author: 'Nadia Putri', datePlace: '' } }).blocks; } catch (_) { sample = null; }
+      }
       detail.innerHTML =
         `<p>${esc(current.description)}</p><div class="flow">` +
         current.flow.map((f, i) => `${i ? '<span class="flow-arrow">→</span>' : ''}<span class="flow-chip" title="${esc(f.d)}">${esc(f.k)}</span>`).join('') +
@@ -1673,6 +1829,16 @@ window.CG.SAMPLES = {
     else setTile('language', 'warn', 'Ditemukan: ' + keys.slice(0, 4).map((k) => `${k} ×${found[k]}`).join(', ') + ' — ubah ke orang ketiga');
 
     // 4) Struktur & kerapian
+    if (state.model !== 'report-writing') {
+      const parts = state.model === 'cornell'
+        ? [['Judul', !!h1], ['Pertanyaan kunci', !!$('table.cornell', el.paper)], ['Catatan', $$('li', el.paper).length > 0], ['Ringkasan', $$('h2', el.paper).length > 0]]
+        : [['Judul', !!h1], ['Peta', !!$('svg', el.paper)], ['Rincian', $$('li', el.paper).length > 0]];
+      $('#fcChips').innerHTML = parts.map(([l, ok]) => `<span class="chip ${ok ? 'is-ok' : 'is-miss'}">${esc(l)}</span>`).join('');
+      const miss = parts.filter((x) => !x[1]).map((x) => x[0]);
+      setTile('organised', miss.length ? 'warn' : 'ok', miss.length ? 'Belum ada: ' + miss.join(', ') : 'Struktur lengkap');
+      $('#fcSummary').textContent = `${$$('.fc-tile').filter((t) => t.dataset.state === 'ok').length}/4 lolos`;
+      return;
+    }
     const h2s = $$('h2', el.paper).map((h) => h.textContent.trim());
     const has = {
       title: !!h1,
@@ -1794,6 +1960,7 @@ window.CG.SAMPLES = {
         fileName: state.file.name,
         pages: state.pages,
         options: readOptions(),
+        model: state.model,
       });
       const finished = await typeOut(result.blocks);
       if (!finished) {
