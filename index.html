@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090a1c"><title>Keuanganku</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"></head><body>
+<div class="app">
+<header>
+<div class="logo"><i></i><span id="brand">keuanganku</span></div>
+<nav id="nav" aria-label="Menu utama"><b class="dot"></b><button data-v="dash">Dashboard</button><button data-v="stats">Statistik</button><button data-v="trx">Transaksi</button><button data-v="wallet">Dompetku</button></nav>
+<div class="hr"><button class="ib" id="bSearch" aria-label="Cari transaksi" data-ic="search"></button><button class="ib" id="bBell" aria-label="Pengingat tagihan" data-ic="bell"></button><button class="av" id="av" aria-label="Pengaturan"></button></div>
+</header>
+<h1 id="title"></h1>
+<main class="grid" id="grid">
+<section class="p bal dash"><h3>Total saldo</h3><div class="big" id="balV"></div><small id="balS"></small>
+<div class="acts"><button class="btn k" data-m="transfer">Transfer</button><button class="btn w" data-m="topup">Isi saldo</button><button class="ib" id="eye" aria-label="Sembunyikan saldo" data-ic="eye"></button></div></section>
+<section class="p inc dash stats"><h3>Pemasukan</h3><div class="mid" id="incV"></div><div class="row"><small>Minggu ini</small><em class="bd" id="incB"></em></div></section>
+<section class="p exp dash stats"><h3>Pengeluaran</h3><div class="mid" id="expV"></div><div class="row"><small>Minggu ini</small><em class="bd" id="expB"></em></div></section>
+<section class="p rev dash stats"><div class="ph"><h3>Arus pemasukan</h3><span class="gap"><button class="chip" id="mode">Bulanan</button><button class="ib sm" id="goStats" aria-label="Buka statistik" data-ic="arrow"></button></span></div>
+<div class="bars" id="bars"></div><small class="tip" id="bTip"></small></section>
+<section class="p spl dash stats"><div class="ph"><h3>Pengeluaran per kategori</h3><button class="chip" id="mon" aria-label="Ganti bulan"></button></div>
+<div class="donut"><div id="don"></div><ul id="leg"></ul></div></section>
+<section class="p ptx dash trx"><div class="ph"><h3>Transaksi terakhir<sup id="cnt"></sup></h3>
+<div class="tools" id="tools" hidden><input id="q" type="search" placeholder="Cari transaksi" aria-label="Cari transaksi"><select id="f" aria-label="Filter jenis"><option value="">Semua</option><option value="in">Masuk</option><option value="out">Keluar</option></select><button class="chip" id="csv">Ekspor CSV</button><button class="chip" data-m="tx">+ Tambah</button></div>
+<a class="link" id="all" href="#trx">Lihat semua</a></div><div id="list"></div></section>
+<aside class="p side dash wallet"><div class="ph"><h3>Kartuku<sup id="cc"></sup></h3><button class="chip" data-m="card">Tambah +</button></div>
+<div class="stack" id="stack"></div><div class="glass" id="cdet"></div>
+<div class="ph sp"><h3>Langganan<sup id="sc"></sup></h3><button class="link" id="mng">Kelola</button></div>
+<div class="sico" id="sico"></div><div id="subs"></div></aside>
+</main>
+</div>
+<dialog id="dlg"><form id="frm"></form></dialog>
+<div id="toast" role="status"></div>
+<script src="app.js"></script>
+</body></html>
