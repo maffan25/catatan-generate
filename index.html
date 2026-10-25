@@ -1,34 +1,1323 @@
-<!doctype html>
-<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090a1c"><title>Keuanganku</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css"></head><body>
-<div class="app">
-<header>
-<div class="logo"><i></i><span id="brand">keuanganku</span></div>
-<nav id="nav" aria-label="Menu utama"><b class="dot"></b><button data-v="dash">Dashboard</button><button data-v="stats">Statistik</button><button data-v="trx">Transaksi</button><button data-v="wallet">Dompetku</button></nav>
-<div class="hr"><button class="ib" id="bSearch" aria-label="Cari transaksi" data-ic="search"></button><button class="ib" id="bBell" aria-label="Pengingat tagihan" data-ic="bell"></button><button class="av" id="av" aria-label="Pengaturan"></button></div>
-</header>
-<h1 id="title"></h1>
-<main class="grid" id="grid">
-<section class="p bal dash"><h3>Total saldo</h3><div class="big" id="balV"></div><small id="balS"></small>
-<div class="acts"><button class="btn k" data-m="transfer">Transfer</button><button class="btn w" data-m="topup">Isi saldo</button><button class="ib" id="eye" aria-label="Sembunyikan saldo" data-ic="eye"></button></div></section>
-<section class="p inc dash stats"><h3>Pemasukan</h3><div class="mid" id="incV"></div><div class="row"><small>Minggu ini</small><em class="bd" id="incB"></em></div></section>
-<section class="p exp dash stats"><h3>Pengeluaran</h3><div class="mid" id="expV"></div><div class="row"><small>Minggu ini</small><em class="bd" id="expB"></em></div></section>
-<section class="p rev dash stats"><div class="ph"><h3>Arus pemasukan</h3><span class="gap"><button class="chip" id="mode">Bulanan</button><button class="ib sm" id="goStats" aria-label="Buka statistik" data-ic="arrow"></button></span></div>
-<div class="bars" id="bars"></div><small class="tip" id="bTip"></small></section>
-<section class="p spl dash stats"><div class="ph"><h3>Pengeluaran per kategori</h3><button class="chip" id="mon" aria-label="Ganti bulan"></button></div>
-<div class="donut"><div id="don"></div><ul id="leg"></ul></div></section>
-<section class="p ptx dash trx"><div class="ph"><h3>Transaksi terakhir<sup id="cnt"></sup></h3>
-<div class="tools" id="tools" hidden><input id="q" type="search" placeholder="Cari transaksi" aria-label="Cari transaksi"><select id="f" aria-label="Filter jenis"><option value="">Semua</option><option value="in">Masuk</option><option value="out">Keluar</option></select><button class="chip" id="csv">Ekspor CSV</button><button class="chip" data-m="tx">+ Tambah</button></div>
-<a class="link" id="all" href="#trx">Lihat semua</a></div><div id="list"></div></section>
-<aside class="p side dash wallet"><div class="ph"><h3>Kartuku<sup id="cc"></sup></h3><button class="chip" data-m="card">Tambah +</button></div>
-<div class="stack" id="stack"></div><div class="glass" id="cdet"></div>
-<div class="ph sp"><h3>Langganan<sup id="sc"></sup></h3><button class="link" id="mng">Kelola</button></div>
-<div class="sico" id="sico"></div><div id="subs"></div></aside>
-</main>
-</div>
-<dialog id="dlg"><form id="frm"></form></dialog>
-<div id="toast" role="status"></div>
-<script src="app.js"></script>
-</body></html>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HAVEN — Personal Command Center</title><meta name="theme-color" content="#faf6ee"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"><style>
+:root{
+  --bg:250 246 238;--surface:255 253 249;--ink:38 38 36;--muted:120 113 102;--line:232 225 212;
+  --accent:196 106 76;--sage:122 139 111;--terra:196 106 76;--amber:217 154 58;
+  --shadow:0 10px 30px -12px rgb(60 40 20 / .18);--lift:0 20px 50px -20px rgb(60 40 20 / .28);
+}
+[data-theme=dark]{--bg:22 22 20;--surface:33 33 30;--ink:240 236 226;--muted:160 154 143;--line:56 55 50;--accent:225 150 70;--sage:150 170 138;--terra:214 125 95;--amber:230 170 80;--shadow:0 10px 30px -12px rgb(0 0 0 / .5);--lift:0 20px 50px -20px rgb(0 0 0 / .6)}
+[data-theme=sage]{--bg:236 241 230;--surface:247 250 243;--ink:31 40 31;--muted:102 115 99;--line:214 224 207;--accent:96 120 88;--sage:96 120 88;--terra:190 108 80;--amber:205 150 60}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:rgb(var(--bg));color:rgb(var(--ink));font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;-webkit-font-smoothing:antialiased;min-height:100dvh}
+.serif{font-family:Fraunces,ui-serif,Georgia,serif;font-weight:500;letter-spacing:-.01em}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+input,select,textarea{font:inherit;color:inherit}
+::selection{background:rgb(var(--accent)/.25)}
+.muted{color:rgb(var(--muted))}.sage{color:rgb(var(--sage))}.terra{color:rgb(var(--terra))}.amber{color:rgb(var(--amber))}.accent{color:rgb(var(--accent))}
+.hidden{display:none!important}
+.card{background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:24px;box-shadow:var(--shadow)}
+.p4{padding:16px}.p5{padding:20px}.p6{padding:24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:9px 16px;font-size:14px;font-weight:500;transition:.2s;border:1px solid transparent;white-space:nowrap}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:rgb(var(--ink));color:rgb(var(--bg))}.btn-primary:hover{opacity:.88}
+.btn-accent{background:rgb(var(--accent));color:#fff;box-shadow:var(--shadow)}.btn-accent:hover{opacity:.9}
+.btn-ghost{background:rgb(var(--surface));border-color:rgb(var(--line))}.btn-ghost:hover{background:rgb(var(--line)/.4)}
+.btn-danger{background:rgb(var(--terra));color:#fff}
+.btn-sm{padding:6px 12px;font-size:12px}
+.input{width:100%;border:1px solid rgb(var(--line));background:rgb(var(--bg)/.6);border-radius:16px;padding:10px 14px;font-size:14px;outline:0;transition:.2s}
+.input:focus{border-color:rgb(var(--accent));box-shadow:0 0 0 3px rgb(var(--accent)/.18)}
+textarea.input{resize:vertical;min-height:80px}
+select.input{appearance:auto}
+label.lbl,.lbl{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgb(var(--muted));margin-bottom:6px}
+.chip{display:inline-flex;align-items:center;border:1px solid rgb(var(--line));background:rgb(var(--bg)/.7);color:rgb(var(--muted));border-radius:999px;padding:1px 10px;font-size:12px;font-weight:500}
+.chip.urgent,.chip.expense{background:rgb(var(--terra)/.14);color:rgb(var(--terra));border-color:rgb(var(--terra)/.3)}
+.chip.high,.chip.doing{background:rgb(var(--amber)/.14);color:rgb(var(--amber));border-color:rgb(var(--amber)/.3)}
+.chip.medium,.chip.done,.chip.active,.chip.income{background:rgb(var(--sage)/.16);color:rgb(var(--sage));border-color:rgb(var(--sage)/.3)}
+.row{display:flex;align-items:center;gap:8px}.wrap{flex-wrap:wrap}.between{justify-content:space-between}.grow{flex:1;min-width:0}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.col2{grid-column:span 2}
+@media(max-width:900px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.col2{grid-column:span 1}}
+@media(max-width:600px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}}
+.stack>*+*{margin-top:10px}.stack-lg>*+*{margin-top:20px}
+.trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tiny{font-size:11px}.sm{font-size:13px}.xs{font-size:12px}
+h1.page{font-size:34px;line-height:1.1}h2.sec{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgb(var(--muted))}
+.bar{height:6px;border-radius:99px;background:rgb(var(--line));overflow:hidden}
+.bar>i{display:block;height:100%;background:rgb(var(--sage));border-radius:99px;transition:width .8s ease}
+.icon-btn{border-radius:999px;padding:7px;color:rgb(var(--muted));display:inline-flex}.icon-btn:hover{background:rgb(var(--line)/.6)}
+.icon-btn.del:hover{background:rgb(var(--terra)/.12);color:rgb(var(--terra))}
+svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* shell */
+#side{position:fixed;inset:0 auto 0 0;width:256px;background:rgb(var(--surface));border-right:1px solid rgb(var(--line));display:flex;flex-direction:column;z-index:40;transition:width .3s,transform .3s}
+body.collapsed #side{width:76px}
+body.collapsed #side .lbl-n,body.collapsed #side .brand-t{display:none}
+#main{padding-left:256px;transition:padding .3s}body.collapsed #main{padding-left:76px}
+.navlink{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;color:rgb(var(--muted));font-size:14px;transition:.2s}
+.navlink:hover{background:rgb(var(--line)/.5);color:rgb(var(--ink))}.navlink.on{background:rgb(var(--ink));color:rgb(var(--bg))}
+#top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;padding:12px 32px;background:rgb(var(--bg)/.82);backdrop-filter:blur(14px);border-bottom:1px solid rgb(var(--line))}
+#view{max-width:1100px;margin:0 auto;padding:32px 32px 140px;animation:rise .4s ease}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#menu-btn{display:none}
+@media(max-width:1000px){#side{transform:translateX(-100%);width:272px!important}body.drawer #side{transform:none;box-shadow:var(--lift)}#main,body.collapsed #main{padding-left:0}#top{padding:12px 16px}#view{padding:20px 16px 140px}#menu-btn{display:inline-flex}body.collapsed #side .lbl-n,body.collapsed #side .brand-t{display:initial}}
+#scrim{position:fixed;inset:0;background:rgb(var(--ink)/.3);backdrop-filter:blur(3px);z-index:35;display:none}body.drawer #scrim{display:block}
+.searchbtn{display:flex;align-items:center;gap:10px;flex:1;max-width:380px;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:999px;padding:8px 16px;color:rgb(var(--muted));font-size:14px;text-align:left}
+.searchbtn:hover{border-color:rgb(var(--accent))}
+#fab{position:fixed;right:24px;bottom:24px;width:56px;height:56px;border-radius:50%;background:rgb(var(--accent));color:#fff;box-shadow:var(--lift);z-index:45;display:flex;align-items:center;justify-content:center;transition:.2s}
+#fab:hover{transform:scale(1.07)}#fab svg{width:26px;height:26px}
+/* modal */
+.ov{position:fixed;inset:0;background:rgb(var(--ink)/.32);backdrop-filter:blur(4px);z-index:80;display:flex;align-items:center;justify-content:center;padding:16px;animation:fade .2s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal{width:100%;max-width:560px;max-height:92dvh;display:flex;flex-direction:column;overflow:hidden;animation:pop .28s cubic-bezier(.2,.9,.3,1.1)}
+.modal.wide{max-width:760px}
+@keyframes pop{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:none}}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgb(var(--line))}
+.mb{padding:20px;overflow-y:auto}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.fgrid .full{grid-column:1/-1}
+@media(max-width:600px){.fgrid{grid-template-columns:1fr}}
+.err{background:rgb(var(--terra)/.1);color:rgb(var(--terra));border-radius:16px;padding:10px 14px;font-size:13px}
+.ok{background:rgb(var(--sage)/.12);color:rgb(var(--sage));border-radius:16px;padding:10px 14px;font-size:13px}
+.warn{background:rgb(var(--amber)/.12);color:rgb(var(--amber));border-radius:16px;padding:10px 14px;font-size:13px}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:120;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:rgb(var(--ink));color:rgb(var(--bg));padding:10px 18px;border-radius:999px;font-size:13px;box-shadow:var(--lift);animation:rise .3s}
+/* tabs / pills */
+.tabs{display:flex;gap:4px;overflow-x:auto;margin-bottom:20px;padding-bottom:4px}
+.tab{padding:8px 16px;border-radius:999px;font-size:14px;font-weight:500;color:rgb(var(--muted));white-space:nowrap;transition:.2s}
+.tab:hover{background:rgb(var(--line)/.5)}.tab.on{background:rgb(var(--ink));color:rgb(var(--bg))}
+.pill{border:1px solid rgb(var(--line));border-radius:999px;padding:6px 14px;font-size:13px;color:rgb(var(--muted));white-space:nowrap}
+.pill.on{border-color:rgb(var(--accent));background:rgb(var(--accent)/.1);color:rgb(var(--accent))}
+/* items */
+.item{display:flex;gap:12px;padding:16px;animation:rise .35s}
+.item.arch{opacity:.55}
+.acts{display:flex;flex-direction:column;gap:2px;opacity:0;transition:.2s}.item:hover .acts,.item:focus-within .acts{opacity:1}
+@media(hover:none){.acts{opacity:1}}
+.chk{width:20px;height:20px;border-radius:50%;border:1.5px solid rgb(var(--line));flex:none;margin-top:2px;display:flex;align-items:center;justify-content:center;color:#fff;transition:.2s}
+.chk:hover{border-color:rgb(var(--accent))}.chk.on{background:rgb(var(--sage));border-color:rgb(var(--sage))}
+.done-t{text-decoration:line-through;color:rgb(var(--muted))}
+.kan{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px}
+.kcol{width:280px;flex:none;border:1px solid rgb(var(--line));background:rgb(var(--bg)/.6);border-radius:24px;padding:12px}
+.kcol.over{border-color:rgb(var(--accent));background:rgb(var(--accent)/.06)}
+.kcard{padding:12px;border-radius:16px;margin-top:8px;cursor:grab;font-size:14px}
+.empty{border:1px dashed rgb(var(--line));border-radius:24px;padding:48px 24px;text-align:center}
+.empty p.t{font-size:18px}
+.skel{height:24px;border-radius:16px;background:linear-gradient(90deg,rgb(var(--line)/.5) 25%,rgb(var(--line)/.9) 50%,rgb(var(--line)/.5) 75%);background-size:200% 100%;animation:sh 1.6s infinite}
+@keyframes sh{0%{background-position:-200% 0}100%{background-position:200% 0}}
+table.t{width:100%;border-collapse:collapse;font-size:14px}table.t th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgb(var(--muted));padding:12px 16px;border-bottom:1px solid rgb(var(--line))}
+table.t td{padding:12px 16px;border-bottom:1px solid rgb(var(--line)/.6)}table.t td.r,table.t th.r{text-align:right}
+.num{font-variant-numeric:tabular-nums}
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.cal .h{text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgb(var(--muted));padding:10px 0;background:rgb(var(--bg)/.6);border-bottom:1px solid rgb(var(--line))}
+.cell{min-height:104px;padding:6px;border-right:1px solid rgb(var(--line)/.7);border-bottom:1px solid rgb(var(--line)/.7)}.cell.out{background:rgb(var(--bg)/.5);color:rgb(var(--muted)/.6)}
+.dn{width:24px;height:24px;border-radius:50%;font-size:12px;display:flex;align-items:center;justify-content:center}.dn:hover{background:rgb(var(--line)/.6)}.dn.today{background:rgb(var(--accent));color:#fff;font-weight:600}
+.ev{display:block;width:100%;text-align:left;font-size:11px;padding:2px 6px;border-radius:6px;border-left:3px solid rgb(var(--muted));background:rgb(var(--line)/.6);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ev.academic{border-color:rgb(var(--sage));background:rgb(var(--sage)/.16)}.ev.work{border-color:rgb(var(--amber));background:rgb(var(--amber)/.16)}.ev.organization{border-color:rgb(var(--terra));background:rgb(var(--terra)/.14)}
+.ev.mk{border:1px dashed rgb(var(--muted)/.5);background:none;color:rgb(var(--muted))}
+.tg{position:relative;height:1152px}.tgc{position:absolute;top:0;bottom:0;border-left:1px solid rgb(var(--line)/.7)}
+.tgl{position:absolute;left:0;right:0;border-top:1px solid rgb(var(--line)/.6);pointer-events:none}
+.blk{position:absolute;overflow:hidden;border-radius:8px;border-left:4px solid rgb(var(--muted));background:rgb(var(--line)/.7);font-size:11px;line-height:1.25;padding:3px 6px;text-align:left}
+.blk.academic{border-color:rgb(var(--sage));background:rgb(var(--sage)/.2)}.blk.work{border-color:rgb(var(--amber));background:rgb(var(--amber)/.2)}.blk.organization{border-color:rgb(var(--terra));background:rgb(var(--terra)/.18)}
+.now{position:absolute;left:0;right:0;border-top:2px solid rgb(var(--accent));z-index:5;pointer-events:none}
+/* charts */
+.ch{display:flex;align-items:flex-end;gap:10px;height:200px;padding-top:10px}
+.ch .b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;height:100%;min-width:0}
+.ch .b i{display:block;width:100%;max-width:44px;border-radius:8px 8px 0 0;background:rgb(var(--sage));min-height:2px;transition:height .8s ease}
+.ch .b span{font-size:11px;color:rgb(var(--muted));white-space:nowrap}.ch .b em{font-style:normal;font-size:11px}
+.dots{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,12px);gap:3px}.dots i{width:12px;height:12px;border-radius:4px;background:rgb(var(--line)/.7)}.dots i.on{background:rgb(var(--sage))}.dots i.f{background:none}
+.ring{position:relative;display:inline-flex;align-items:center;justify-content:center}.ring b{position:absolute;font-size:12px}
+/* landing */
+#land{background:rgb(var(--bg))}
+.hero{position:relative;height:100dvh;min-height:640px;overflow:hidden}
+.hero svg.layer{position:absolute;inset:0;width:100%;height:100%;will-change:transform}
+.hero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgb(255 255 255/.25),transparent 40%,rgb(0 0 0/.1))}
+.lnav{position:absolute;left:50%;top:20px;transform:translateX(-50%);z-index:20;width:min(92%,34rem);display:flex;align-items:center;justify-content:space-between;background:rgb(255 255 255/.9);backdrop-filter:blur(14px);border-radius:999px;padding:8px 8px 8px 20px;box-shadow:var(--shadow);color:#262624;font-size:14px;animation:down .8s both}
+@keyframes down{from{opacity:0;transform:translate(-50%,-16px)}to{opacity:1;transform:translate(-50%,0)}}
+.lnav .lk{display:flex;gap:20px;font-size:13px;color:#555}.lnav .lk a:hover{color:#000}
+.lnav .go{background:#1d1d1b;color:#fff;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:500}
+@media(max-width:560px){.lnav .lk{display:none}}
+.htext{position:relative;z-index:10;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px 64px;color:#1f1f1d;will-change:transform,opacity}
+.htext>*{opacity:0;animation:blurin .9s cubic-bezier(.22,1,.36,1) forwards}
+.htext>*:nth-child(1){animation-delay:.3s}.htext>*:nth-child(2){animation-delay:.42s}.htext>*:nth-child(3){animation-delay:.54s}.htext>*:nth-child(4){animation-delay:.66s}.htext>*:nth-child(5){animation-delay:.78s}
+@keyframes blurin{from{opacity:0;transform:translateY(22px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+.htext h1{font-size:clamp(56px,11vw,120px);line-height:1}
+.btnw{background:#fff;color:#1f1f1d;border-radius:999px;padding:13px 26px;font-weight:600;font-size:14px;box-shadow:var(--lift);display:inline-flex;gap:8px;align-items:center;transition:.2s}.btnw:hover{transform:translateY(-2px)}
+.scrollh{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:10;background:rgb(0 0 0/.25);backdrop-filter:blur(8px);color:#fff;border-radius:999px;padding:8px 16px;font-size:11px;letter-spacing:.2em;font-weight:500}
+.rev{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s}.rev.in{opacity:1;transform:none}
+.sect{max-width:1100px;margin:0 auto;padding:110px 24px}
+.fcard{padding:24px;transition:.25s}.fcard:hover{transform:translateY(-4px)}
+.fic{display:inline-flex;padding:12px;border-radius:16px;background:rgb(var(--accent)/.1);color:rgb(var(--accent));margin-bottom:14px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}.rev{opacity:1;transform:none}.htext>*{opacity:1}}
+#pal .pi{display:flex;justify-content:space-between;width:100%;padding:8px 12px;border-radius:12px;font-size:14px;text-align:left}#pal .pi.on{background:rgb(var(--accent)/.1);color:rgb(var(--accent))}
+#pal .pg{padding:12px 12px 4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgb(var(--muted))}
+
+.chk svg{width:12px;height:12px;stroke-width:3}
+/* landing — gaya referensi */
+.hero.lt .shade{display:none}
+.lnav{border-radius:999px;padding:8px 8px 8px 22px;width:min(92%,38rem);font-family:Inter,system-ui,sans-serif}
+.lnav .lk{gap:22px;font-size:12.5px;color:#3a3a45}
+.lnav .go{background:#17162a}
+.htext{color:#17162a;padding-bottom:110px;font-family:Inter,system-ui,sans-serif}
+.htext h1{font-family:Inter,system-ui,sans-serif;font-weight:700;letter-spacing:-.035em;font-size:clamp(44px,8.5vw,92px);line-height:1.04;color:#17162a;margin:22px 0 18px}
+.htext .mb{display:none}@media(max-width:560px){.htext .mb{display:inline}}
+.lbadge{background:rgb(255 255 255/.55);backdrop-filter:blur(10px);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:500;color:#2c2b3a}
+.lsub{font-size:clamp(15px,2vw,19px);line-height:1.5;color:#2c2b3a;max-width:34rem;margin:0 0 30px}
+.lghost{font-size:15px;font-weight:500;color:#17162a;padding:13px 4px}.lghost:hover{text-decoration:underline}
+.btnw{box-shadow:0 10px 30px rgb(23 22 42/.18)}
+.lh2{font-family:Inter,system-ui,sans-serif;font-weight:700;letter-spacing:-.03em;font-size:clamp(28px,4.5vw,44px)}
+.scrollh{letter-spacing:.3em;font-size:10px;background:rgb(40 40 50/.35)}
+</style></head><body><div id="root"></div><script>
+/* ============================ HAVEN core ============================ */
+/* Utilitas, penyimpanan lokal, skema modul, keuangan, CSV. Tanpa DOM. */
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const uid = () => (globalThis.crypto && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+const pad = (n) => String(n).padStart(2, "0");
+const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
+
+const idr = (n) => { n = Math.trunc(Number.isFinite(n) ? n : 0); return (n < 0 ? "-" : "") + "Rp" + fmtNum(Math.abs(n)); };
+const idrC = (n) => {
+  const a = Math.abs(n), s = n < 0 ? "-" : "";
+  if (a >= 1e9) return s + "Rp" + (a / 1e9).toFixed(1) + "M";
+  if (a >= 1e6) return s + "Rp" + (a / 1e6).toFixed(1) + "jt";
+  if (a >= 1e3) return s + "Rp" + Math.round(a / 1e3) + "rb";
+  return s + "Rp" + a;
+};
+const fmtNum = (n) => new Intl.NumberFormat("id-ID").format(n);
+const parseMoney = (s) => { const d = String(s).replace(/[^\d]/g, ""); if (!d) return null; const n = Number(d); return Number.isSafeInteger(n) ? n : null; };
+
+const ymd = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const todayIn = (tz) => { try { return new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); } catch { return ymd(); } };
+const minutesNow = (tz) => { try { const p = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(new Date()); return (Number(p.find((x) => x.type === "hour").value) % 24) * 60 + Number(p.find((x) => x.type === "minute").value); } catch { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); } };
+const parseYMD = (s) => { const [y, m, d] = String(s).slice(0, 10).split("-").map(Number); return new Date(y, (m || 1) - 1, d || 1); };
+const addDays = (s, n) => { const d = parseYMD(s); d.setDate(d.getDate() + n); return ymd(d); };
+const addMonths = (m, n) => { const [y, mo] = m.split("-").map(Number); const d = new Date(y, mo - 1 + n, 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; };
+const daysBetween = (a, b) => Math.round((parseYMD(b) - parseYMD(a)) / 864e5);
+const fmtDate = (s, o) => (s ? parseYMD(s).toLocaleDateString("id-ID", o || { day: "numeric", month: "short", year: "numeric" }) : "");
+const monthLabel = (m) => parseYMD(m + "-01").toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+const startOfWeek = (s, ws) => { const d = parseYMD(s); d.setDate(d.getDate() - ((d.getDay() - ws + 7) % 7)); return ymd(d); };
+const mins = (t) => { const [h, m] = String(t).split(":").map(Number); return (h || 0) * 60 + (m || 0); };
+
+function downloadFile(name, content, mime = "text/plain") {
+  const url = URL.createObjectURL(new Blob([content], { type: mime + ";charset=utf-8" }));
+  const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+const toCSV = (rows, cols) => {
+  const e = (v) => { const s = v == null ? "" : String(v); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  return [cols.join(","), ...rows.map((r) => cols.map((c) => e(r[c])).join(","))].join("\n");
+};
+function parseCSV(text) {
+  const rows = []; let row = [], cur = "", q = false; const s = text.replace(/^﻿/, "");
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (q) { if (c === '"') { if (s[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { row.push(cur); cur = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && s[i + 1] === "\n") i++; row.push(cur); cur = ""; if (row.some((x) => x.trim() !== "")) rows.push(row); row = []; }
+    else cur += c;
+  }
+  row.push(cur); if (row.some((x) => x.trim() !== "")) rows.push(row);
+  return rows;
+}
+
+/* ------------------------------ icons ------------------------------ */
+const ICONS = {
+  home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>', check: '<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12l3 3 5-6"/>',
+  calendar: '<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/>', folder: '<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>',
+  book: '<path d="M4 4h6a3 3 0 013 3v13a2 2 0 00-2-2H4zM20 4h-6a3 3 0 00-3 3v13a2 2 0 012-2h7z"/>', briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M3 13h18"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.500 6.500 6M16 4.500a3.500 3.500 0 010 7M18 14c2 .8 3.500 2.700 3.500 6"/>',
+  wallet: '<path d="M3 7a2 2 0 012-2h13v4M3 7v11a2 2 0 002 2h15V9H5a2 2 0 01-2-2z"/><circle cx="16" cy="14.500" r="1"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>', note: '<path d="M5 3h10l4 4v14H5z"/><path d="M14 3v5h5M8 13h8M8 17h5"/>',
+  repeat: '<path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 014-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 01-4 4H4"/>', file: '<path d="M6 2h8l5 5v15H6z"/><path d="M14 2v6h5"/>',
+  chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>', search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.500-4.500"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M19.400 15a1.700 1.700 0 00.3 1.800l.1.1a2 2 0 11-2.800 2.800l-.1-.1a1.700 1.700 0 00-1.800-.3 1.700 1.700 0 00-1 1.500V21a2 2 0 11-4 0v-.1a1.700 1.700 0 00-1.100-1.500 1.700 1.700 0 00-1.800.3l-.1.1a2 2 0 11-2.800-2.800l.1-.1a1.700 1.700 0 00.3-1.800 1.700 1.700 0 00-1.500-1H3a2 2 0 110-4h.1a1.700 1.700 0 001.500-1.100 1.700 1.700 0 00-.3-1.800l-.1-.1a2 2 0 112.800-2.800l.1.1a1.700 1.700 0 001.800.3H9a1.700 1.700 0 001-1.500V3a2 2 0 114 0v.1a1.700 1.700 0 001 1.500 1.700 1.700 0 001.800-.3l.1-.1a2 2 0 112.800 2.800l-.1.1a1.700 1.700 0 00-.3 1.800V9a1.700 1.700 0 001.500 1H21a2 2 0 110 4h-.1a1.700 1.700 0 00-1.500 1z"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', x: '<path d="M18 6L6 18M6 6l12 12"/>', menu: '<path d="M3 6h18M3 12h18M3 18h18"/>', edit: '<path d="M12 20h9M16.500 3.500a2.100 2.100 0 013 3L7 19l-4 1 1-4z"/>',
+  trash: '<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>', archive: '<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v12h14V8M10 12h4"/>', arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  down: '<path d="M12 5v14M6 13l6 6 6-6"/>', left: '<path d="M15 6l-6 6 6 6"/>', right: '<path d="M9 6l6 6-6 6"/>', ck: '<path d="M5 12l5 5 9-10"/>', dl: '<path d="M12 4v12M6 11l6 6 6-6M4 20h16"/>', ul: '<path d="M12 16V4M6 9l6-6 6 6M4 20h16"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>', kanban: '<rect x="3" y="3" width="7" height="18" rx="2"/><rect x="14" y="3" width="7" height="11" rx="2"/>', db: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.700 3.600 3 8 3s8-1.300 8-3V5M4 12c0 1.700 3.600 3 8 3s8-1.300 8-3"/>',
+  receipt: '<path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/>', cal2: '<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18M12 13v5M9.500 15.500h5"/>', folder2: '<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2zM12 10v5M9.500 12.500h5"/>',
+};
+const ic = (n, extra = "") => `<svg class="i ${extra}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ""}</svg>`;
+
+/* ------------------------------ store ------------------------------ */
+const STORAGE_KEY = "haven:v1";
+const DEFAULT_SETTINGS = { name: "Affan", tagline: "Your life, thoughtfully organized.", timezone: "Asia/Jakarta", theme: "light", weekStart: 1, heroImage: "", lastBackup: "" };
+const nowISO = () => new Date().toISOString();
+
+function seedDB() {
+  const t = nowISO();
+  const inc = ["Uang saku", "Gaji", "Freelance", "Beasiswa", "Bisnis", "Lainnya"];
+  const exp = ["Makanan", "Transportasi", "Pendidikan", "Kebutuhan pribadi", "Hiburan", "Langganan", "Kesehatan", "Organisasi", "Tabungan", "Lainnya"];
+  const mk = (name, kind) => ({ id: uid(), createdAt: t, updatedAt: t, name, kind });
+  return { version: 1, settings: { ...DEFAULT_SETTINGS }, data: { categories: [...inc.map((n) => mk(n, "income")), ...exp.map((n) => mk(n, "expense"))] } };
+}
+function normalizeDB(raw) {
+  if (!raw || typeof raw !== "object" || !raw.data || typeof raw.data !== "object") return null;
+  const data = {};
+  for (const [k, v] of Object.entries(raw.data)) if (Array.isArray(v)) data[k] = v;
+  return { version: 1, settings: { ...DEFAULT_SETTINGS, ...(raw.settings || {}) }, data };
+}
+const Store = {
+  db: null, listeners: new Set(), status: { state: "idle" },
+  load() {
+    try { const raw = localStorage.getItem(STORAGE_KEY); const p = raw ? normalizeDB(JSON.parse(raw)) : null; this.db = p || seedDB(); if (!p) this.persist(); }
+    catch { this.db = seedDB(); }
+    return this.db;
+  },
+  persist() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.db)); this.status = { state: "saved", at: Date.now() }; this.emitStatus(); return true; }
+    catch (e) { this.status = { state: "error", error: String(e && e.message || e) }; this.emitStatus(); return false; }
+  },
+  emitStatus() { this.statusCb && this.statusCb(this.status); },
+  /** Terapkan perubahan; bila gagal disimpan, dibatalkan (tidak setengah jalan). */
+  commit(next) {
+    const prev = this.db; this.db = next;
+    if (!this.persist()) { this.db = prev; return false; }
+    this.listeners.forEach((l) => l()); return true;
+  },
+  list(col) { return this.db.data[col] || []; },
+  get(col, id) { return this.list(col).find((i) => i.id === id); },
+  add(col, vals) { const t = nowISO(); const item = { ...vals, id: uid(), createdAt: t, updatedAt: t }; const ok = this.commit({ ...this.db, data: { ...this.db.data, [col]: [...this.list(col), item] } }); return ok ? item : null; },
+  addMany(col, rows) { const t = nowISO(); const items = rows.map((r) => ({ ...r, id: uid(), createdAt: t, updatedAt: t })); return this.commit({ ...this.db, data: { ...this.db.data, [col]: [...this.list(col), ...items] } }); },
+  update(col, id, patch) { return this.commit({ ...this.db, data: { ...this.db.data, [col]: this.list(col).map((i) => (i.id === id ? { ...i, ...patch, updatedAt: nowISO() } : i)) } }); },
+  settings(patch) { return this.commit({ ...this.db, settings: { ...this.db.settings, ...patch } }); },
+  replaceAll(db) { return this.commit(db); },
+  reset() { return this.commit(seedDB()); },
+  /** Hapus + jaga integritas relasi dalam satu operasi atomik. */
+  remove(col, item) {
+    if (col === "accounts" && this.list("transactions").some((t) => t.accountId === item.id || t.toAccountId === item.id))
+      return { ok: false, message: "Akun ini sudah punya transaksi. Hapus transaksinya dulu, atau arsipkan akun agar saldo & laporan tetap benar." };
+    const data = { ...this.db.data };
+    data[col] = (data[col] || []).filter((i) => i.id !== item.id);
+    for (const r of (SCHEMA[col] && SCHEMA[col].referencedBy) || []) {
+      const l = data[r.col] || [];
+      data[r.col] = ["habitLogs", "contributions"].includes(r.col) ? l.filter((i) => i[r.field] !== item.id) : l.map((i) => (i[r.field] === item.id ? { ...i, [r.field]: "" } : i));
+    }
+    return this.commit({ ...this.db, data }) ? { ok: true } : { ok: false, message: "Gagal menyimpan perubahan. Tidak ada data yang diubah." };
+  },
+};
+const S = () => Store.db.settings;
+const TODAY = () => todayIn(S().timezone);
+
+/* ------------------------------ schema ------------------------------ */
+const O = (...a) => a.map(([value, label]) => ({ value, label }));
+const AREA = O(["academic", "Akademik"], ["work", "Pekerjaan"], ["organization", "Organisasi"], ["personal", "Pribadi"]);
+const PRIORITY = O(["urgent", "Urgent"], ["high", "High"], ["medium", "Medium"], ["low", "Low"]);
+const PRANK = { urgent: 0, high: 1, medium: 2, low: 3 };
+const TASK_STATUS = O(["inbox", "Inbox"], ["todo", "To Do"], ["doing", "In Progress"], ["waiting", "Waiting"], ["done", "Done"]);
+const optLabel = (opts, v) => ((opts || []).find((x) => x.value === v) || {}).label || v;
+
+const SCHEMA = {
+  tasks: { label: "Tugas", singular: "Tugas", titleKey: "title", badges: ["status", "priority", "area"], meta: ["dueDate", "projectId", "estimate"], kanban: "status",
+    defaults: { status: "todo", priority: "medium", area: "personal" }, doneKey: { field: "status", done: "done", undone: "todo" },
+    fields: [
+      { key: "title", label: "Judul tugas", type: "text", required: true, full: true }, { key: "description", label: "Deskripsi", type: "textarea", full: true },
+      { key: "status", label: "Status", type: "select", options: TASK_STATUS, required: true }, { key: "priority", label: "Prioritas", type: "select", options: PRIORITY, required: true },
+      { key: "area", label: "Area kehidupan", type: "select", options: AREA }, { key: "category", label: "Kategori", type: "text", placeholder: "mis. Makalah, Belanja" },
+      { key: "startDate", label: "Tanggal mulai", type: "date" }, { key: "dueDate", label: "Tenggat", type: "date" },
+      { key: "estimate", label: "Estimasi durasi (menit)", type: "number", min: 0 }, { key: "projectId", label: "Proyek terkait", type: "relation", to: "projects" },
+      { key: "reminder", label: "Pengingat (tanggal)", type: "date" }, { key: "subtasks", label: "Subtugas", type: "checklist", full: true }, { key: "notes", label: "Catatan tambahan", type: "textarea", full: true },
+    ],
+    presets: [
+      { key: "myday", label: "My Day", test: (i, t) => i.status !== "done" && (i.dueDate === t || (i.dueDate && i.dueDate < t) || i.startDate === t || i.status === "doing") },
+      { key: "upcoming", label: "Upcoming", test: (i, t) => i.status !== "done" && i.dueDate && i.dueDate > t && i.dueDate <= addDays(t, 14) },
+      { key: "overdue", label: "Overdue", test: (i, t) => i.status !== "done" && i.dueDate && i.dueDate < t },
+      { key: "all", label: "All Tasks", test: () => true }, { key: "done", label: "Completed", test: (i) => i.status === "done" },
+    ],
+    groupings: [{ key: "none", label: "Tanpa grup", by: () => "" }, { key: "project", label: "By Project", by: (i) => (Store.get("projects", i.projectId) || {}).name || "Tanpa proyek" }, { key: "area", label: "By Area", by: (i) => optLabel(AREA, i.area) || "Tanpa area" }],
+    sorts: [{ key: "due", label: "Tenggat", by: (i) => i.dueDate || "9999-99-99" }, { key: "priority", label: "Prioritas", by: (i) => PRANK[i.priority] ?? 9 }, { key: "created", label: "Terbaru", by: (i) => i.createdAt, dir: "desc" }],
+    beforeSave: (v, t) => ({ ...v, completedAt: v.status === "done" ? v.completedAt || t : "" }),
+    progress: (i) => { const st = i.subtasks || []; if (!st.length) return null; const d = st.filter((s) => s.done).length; return { pct: Math.round((d / st.length) * 100), label: `${d}/${st.length} subtugas` }; },
+  },
+  projects: { label: "Proyek", singular: "Proyek", titleKey: "name", badges: ["status", "priority", "area"], meta: ["targetDate", "budget"], defaults: { status: "active", priority: "medium", area: "personal", progressMode: "auto" },
+    referencedBy: [{ col: "tasks", field: "projectId" }, { col: "events", field: "projectId" }, { col: "documents", field: "projectId" }, { col: "notes", field: "projectId" }, { col: "jobs", field: "projectId" }],
+    fields: [
+      { key: "name", label: "Nama proyek", type: "text", required: true, full: true }, { key: "description", label: "Deskripsi", type: "textarea", full: true },
+      { key: "area", label: "Area", type: "select", options: AREA }, { key: "status", label: "Status", type: "select", options: O(["planning", "Perencanaan"], ["active", "Aktif"], ["paused", "Ditunda"], ["done", "Selesai"]) },
+      { key: "priority", label: "Prioritas", type: "select", options: PRIORITY }, { key: "startDate", label: "Mulai", type: "date" }, { key: "targetDate", label: "Target selesai", type: "date" },
+      { key: "budget", label: "Anggaran (opsional)", type: "money" }, { key: "progressMode", label: "Perhitungan progres", type: "select", options: O(["auto", "Otomatis dari tugas selesai"], ["manual", "Manual"]) },
+      { key: "manualProgress", label: "Progres manual (%)", type: "number", min: 0, max: 100, showIf: (v) => v.progressMode === "manual" },
+      { key: "milestones", label: "Milestone", type: "checklist", full: true }, { key: "notes", label: "Catatan", type: "textarea", full: true },
+    ],
+    progress: (i) => {
+      if (i.progressMode === "manual") return { pct: clamp(Number(i.manualProgress) || 0, 0, 100), label: "Progres manual" };
+      const tasks = Store.list("tasks").filter((t) => t.projectId === i.id && !t.archived); const ms = i.milestones || []; const total = tasks.length + ms.length;
+      if (!total) return { pct: 0, label: "Belum ada tugas/milestone" };
+      const done = tasks.filter((t) => t.status === "done").length + ms.filter((m) => m.done).length; return { pct: Math.round((done / total) * 100), label: `${done}/${total} selesai` };
+    },
+  },
+  events: { label: "Agenda", singular: "Acara", titleKey: "title", badges: ["category"], meta: ["date", "startTime", "location"], defaults: { category: "personal", allDay: false },
+    fields: [
+      { key: "title", label: "Judul acara", type: "text", required: true, full: true }, { key: "date", label: "Tanggal", type: "date", required: true }, { key: "allDay", label: "Sepanjang hari", type: "checkbox" },
+      { key: "startTime", label: "Mulai", type: "time", required: true, showIf: (v) => !v.allDay }, { key: "endTime", label: "Selesai", type: "time", showIf: (v) => !v.allDay },
+      { key: "category", label: "Kategori", type: "select", options: AREA }, { key: "location", label: "Lokasi", type: "text" }, { key: "projectId", label: "Proyek terkait", type: "relation", to: "projects" },
+      { key: "reminderMin", label: "Pengingat (menit sebelum)", type: "number", min: 0, showIf: (v) => !v.allDay }, { key: "notes", label: "Catatan", type: "textarea", full: true },
+    ],
+    validate: (v) => (!v.allDay && v.startTime && v.endTime && v.endTime <= v.startTime ? "Jam selesai harus setelah jam mulai." : null),
+    sorts: [{ key: "date", label: "Tanggal", by: (i) => `${i.date}${i.startTime || "00:00"}` }],
+  },
+  semesters: { label: "Semester", singular: "Semester", titleKey: "name", badges: ["status"], meta: ["startDate", "endDate", "targetIP"], defaults: { status: "active" }, referencedBy: [{ col: "courses", field: "semesterId" }],
+    fields: [
+      { key: "name", label: "Semester", type: "text", required: true, placeholder: "Ganjil 2026/2027", full: true }, { key: "startDate", label: "Tanggal mulai", type: "date" }, { key: "endDate", label: "Tanggal selesai", type: "date" },
+      { key: "targetIP", label: "Target IP", type: "number", min: 0, max: 4, step: 0.01 }, { key: "status", label: "Status", type: "select", options: O(["active", "Berjalan"], ["done", "Selesai"]) }, { key: "notes", label: "Catatan", type: "textarea", full: true },
+    ],
+    subtitle: (i) => {
+      const cs = Store.list("courses").filter((c) => c.semesterId === i.id && c.gradePoint !== "" && c.gradePoint != null && Number(c.sks) > 0); if (!cs.length) return null;
+      const sks = cs.reduce((s, c) => s + Number(c.sks), 0); return `IP berjalan: ${(cs.reduce((s, c) => s + Number(c.sks) * Number(c.gradePoint), 0) / sks).toFixed(2)} (dari ${cs.length} mata kuliah bernilai)`;
+    },
+  },
+  courses: { label: "Mata kuliah", singular: "Mata kuliah", titleKey: "name", meta: ["code", "lecturer", "sks", "schedule", "semesterId"], referencedBy: [{ col: "assignments", field: "courseId" }, { col: "exams", field: "courseId" }, { col: "notes", field: "courseId" }],
+    fields: [
+      { key: "name", label: "Nama mata kuliah", type: "text", required: true, full: true }, { key: "code", label: "Kode", type: "text" }, { key: "lecturer", label: "Dosen", type: "text" },
+      { key: "sks", label: "SKS", type: "number", min: 0, max: 12 }, { key: "semesterId", label: "Semester", type: "relation", to: "semesters" }, { key: "schedule", label: "Jadwal", type: "text", placeholder: "Senin 08.00–10.00" },
+      { key: "room", label: "Ruangan / tautan kelas", type: "text" }, { key: "targetGrade", label: "Target nilai", type: "text", placeholder: "A" },
+      { key: "gradePoint", label: "Bobot nilai akhir (0–4)", type: "number", min: 0, max: 4, step: 0.01, hint: "Isi sendiri sesuai skala kampusmu; dipakai menghitung IP." },
+      { key: "references", label: "Referensi materi", type: "textarea", full: true }, { key: "notes", label: "Catatan", type: "textarea", full: true },
+    ],
+  },
+  assignments: { label: "Tugas kuliah", singular: "Tugas kuliah", titleKey: "title", badges: ["status", "priority", "kind"], meta: ["courseId", "dueDate", "score"], kanban: "status", defaults: { status: "todo", priority: "medium", kind: "tugas" }, doneKey: { field: "status", done: "done", undone: "todo" },
+    fields: [
+      { key: "title", label: "Judul tugas", type: "text", required: true, full: true }, { key: "courseId", label: "Mata kuliah", type: "relation", to: "courses", required: true },
+      { key: "kind", label: "Jenis", type: "select", options: O(["tugas", "Tugas"], ["makalah", "Makalah"], ["presentasi", "Presentasi"], ["praktik", "Praktik"], ["lainnya", "Lainnya"]) },
+      { key: "dueDate", label: "Deadline", type: "date" }, { key: "status", label: "Status", type: "select", options: O(["todo", "To Do"], ["doing", "In Progress"], ["done", "Done"]) },
+      { key: "priority", label: "Prioritas", type: "select", options: PRIORITY }, { key: "score", label: "Nilai", type: "number", min: 0, max: 100, step: 0.01 }, { key: "weight", label: "Bobot (%)", type: "number", min: 0, max: 100 },
+      { key: "link", label: "Tautan / lampiran", type: "url" }, { key: "description", label: "Deskripsi", type: "textarea", full: true }, { key: "notes", label: "Catatan pengerjaan", type: "textarea", full: true },
+    ],
+    sorts: [{ key: "due", label: "Deadline", by: (i) => i.dueDate || "9999-99-99" }],
+  },
+  exams: { label: "Ujian", singular: "Ujian", titleKey: "title", badges: ["kind", "status"], meta: ["courseId", "date", "room"], defaults: { kind: "uts", status: "planned" },
+    fields: [
+      { key: "title", label: "Judul", type: "text", required: true, full: true }, { key: "courseId", label: "Mata kuliah", type: "relation", to: "courses", required: true },
+      { key: "kind", label: "Jenis", type: "select", options: O(["uts", "UTS"], ["uas", "UAS"], ["kuis", "Kuis"], ["presentasi", "Presentasi"], ["lisan", "Ujian lisan"], ["praktik", "Ujian praktik"]) },
+      { key: "date", label: "Tanggal", type: "date", required: true }, { key: "startTime", label: "Jam", type: "time" }, { key: "room", label: "Ruangan", type: "text" },
+      { key: "status", label: "Status", type: "select", options: O(["planned", "Terjadwal"], ["done", "Selesai"]) }, { key: "score", label: "Nilai", type: "number", min: 0, max: 100, step: 0.01 }, { key: "studyPlan", label: "Rencana belajar", type: "textarea", full: true },
+    ],
+    sorts: [{ key: "date", label: "Tanggal", by: (i) => i.date || "9999" }],
+  },
+  jobs: { label: "Pekerjaan", singular: "Pekerjaan", titleKey: "name", badges: ["status"], meta: ["client", "deadline", "hours", "income"], kanban: "status", defaults: { status: "active" },
+    fields: [
+      { key: "name", label: "Pekerjaan / proyek kerja", type: "text", required: true, full: true }, { key: "client", label: "Klien / tempat kerja", type: "text" },
+      { key: "status", label: "Status", type: "select", options: O(["prospect", "Prospek"], ["active", "Berjalan"], ["waiting", "Menunggu"], ["done", "Selesai"]) }, { key: "deadline", label: "Tenggat", type: "date" },
+      { key: "hours", label: "Jam kerja / estimasi", type: "number", min: 0, step: 0.5 }, { key: "income", label: "Pendapatan pekerjaan", type: "money", hint: "Dipisahkan dari pemasukan pribadi; catat realisasinya di Keuangan dengan lingkup Pekerjaan." },
+      { key: "projectId", label: "Proyek terkait", type: "relation", to: "projects" }, { key: "notes", label: "Catatan", type: "textarea", full: true },
+    ],
+  },
+  organizations: { label: "Profil organisasi", singular: "Organisasi", titleKey: "name", meta: ["period", "role"], referencedBy: [{ col: "programs", field: "orgId" }, { col: "meetings", field: "orgId" }, { col: "documents", field: "orgId" }, { col: "notes", field: "orgId" }],
+    fields: [{ key: "name", label: "Nama organisasi", type: "text", required: true, full: true }, { key: "period", label: "Periode kepengurusan", type: "text" }, { key: "role", label: "Jabatan", type: "text" }, { key: "description", label: "Deskripsi", type: "textarea", full: true }, { key: "notes", label: "Catatan", type: "textarea", full: true }],
+  },
+  programs: { label: "Program kerja", singular: "Program kerja", titleKey: "name", badges: ["status"], meta: ["orgId", "pic", "startDate", "endDate"], kanban: "status", defaults: { status: "planned", progress: 0 },
+    fields: [
+      { key: "name", label: "Nama program kerja", type: "text", required: true, full: true }, { key: "orgId", label: "Organisasi", type: "relation", to: "organizations" }, { key: "goal", label: "Tujuan", type: "textarea", full: true },
+      { key: "pic", label: "Penanggung jawab", type: "text" }, { key: "status", label: "Status pelaksanaan", type: "select", options: O(["planned", "Direncanakan"], ["running", "Berjalan"], ["done", "Selesai"], ["cancelled", "Dibatalkan"]) },
+      { key: "startDate", label: "Mulai", type: "date" }, { key: "endDate", label: "Selesai", type: "date" }, { key: "budgetPlan", label: "Rencana anggaran", type: "money" }, { key: "budgetActual", label: "Pengeluaran aktual", type: "money" },
+      { key: "progress", label: "Progres (%)", type: "number", min: 0, max: 100 }, { key: "notes", label: "Catatan bukti transaksi / lainnya", type: "textarea", full: true },
+    ],
+    progress: (i) => ({ pct: clamp(Number(i.progress) || 0, 0, 100), label: "Progres (manual)" }),
+    subtitle: (i) => { if (!Number.isSafeInteger(i.budgetPlan) && !Number.isSafeInteger(i.budgetActual)) return null; const p = Number(i.budgetPlan) || 0, a = Number(i.budgetActual) || 0; return `Anggaran ${idr(p)} · Aktual ${idr(a)} · Selisih ${idr(p - a)}`; },
+  },
+  meetings: { label: "Rapat", singular: "Rapat", titleKey: "title", meta: ["date", "orgId", "followUpPic"],
+    fields: [
+      { key: "title", label: "Judul rapat", type: "text", required: true, full: true }, { key: "date", label: "Tanggal", type: "date", required: true }, { key: "orgId", label: "Organisasi", type: "relation", to: "organizations" },
+      { key: "agenda", label: "Agenda", type: "textarea", full: true }, { key: "notes", label: "Catatan rapat", type: "textarea", full: true }, { key: "decisions", label: "Keputusan", type: "textarea", full: true },
+      { key: "followUp", label: "Tindak lanjut", type: "textarea", full: true }, { key: "followUpPic", label: "PJ tindak lanjut", type: "text" },
+    ],
+    sorts: [{ key: "date", label: "Terbaru", by: (i) => i.date || "", dir: "desc" }],
+  },
+  goals: { label: "Tujuan", singular: "Tujuan", titleKey: "name", badges: ["horizon", "status", "area"], meta: ["deadline", "target"], defaults: { horizon: "monthly", status: "active", area: "personal" },
+    fields: [
+      { key: "name", label: "Nama tujuan", type: "text", required: true, full: true }, { key: "why", label: "Alasan / tujuan", type: "textarea", full: true },
+      { key: "horizon", label: "Horizon", type: "select", options: O(["daily", "Harian"], ["weekly", "Mingguan"], ["monthly", "Bulanan"], ["semester", "Semesteran"], ["yearly", "Tahunan"], ["long", "Jangka panjang"]) },
+      { key: "area", label: "Kategori hidup", type: "select", options: AREA }, { key: "target", label: "Target terukur", type: "text" }, { key: "deadline", label: "Deadline", type: "date" },
+      { key: "status", label: "Status", type: "select", options: O(["active", "Berjalan"], ["paused", "Ditunda"], ["done", "Tercapai"]) }, { key: "milestones", label: "Milestone (Goal Breakdown)", type: "checklist", full: true }, { key: "notes", label: "Catatan evaluasi", type: "textarea", full: true },
+    ],
+    progress: (i) => { const ms = i.milestones || []; if (!ms.length) return { pct: i.status === "done" ? 100 : 0, label: "Belum ada milestone" }; const d = ms.filter((m) => m.done).length; return { pct: Math.round((d / ms.length) * 100), label: `${d}/${ms.length} milestone` }; },
+  },
+  notes: { label: "Catatan", singular: "Catatan", titleKey: "title", meta: ["category", "courseId", "projectId"], defaults: { favorite: false },
+    fields: [
+      { key: "title", label: "Judul", type: "text", required: true, full: true }, { key: "body", label: "Isi catatan", type: "textarea", full: true, rows: 10, hint: "Teks biasa; boleh gaya Markdown." },
+      { key: "category", label: "Kategori", type: "text", placeholder: "Kuliah, Ide, Evaluasi…" }, { key: "tags", label: "Tag (pisahkan koma)", type: "tags" }, { key: "favorite", label: "Favorit", type: "checkbox" },
+      { key: "courseId", label: "Mata kuliah", type: "relation", to: "courses" }, { key: "projectId", label: "Proyek", type: "relation", to: "projects" }, { key: "orgId", label: "Organisasi", type: "relation", to: "organizations" },
+    ],
+    sorts: [{ key: "updated", label: "Terbaru diubah", by: (i) => i.updatedAt, dir: "desc" }],
+    presets: [{ key: "all", label: "Semua", test: () => true }, { key: "fav", label: "Favorit", test: (i) => !!i.favorite }],
+  },
+  habits: { label: "Kebiasaan", singular: "Kebiasaan", titleKey: "name", referencedBy: [{ col: "habitLogs", field: "habitId" }], defaults: { schedule: "daily", targetPerWeek: 7 },
+    fields: [
+      { key: "name", label: "Nama kebiasaan", type: "text", required: true, full: true }, { key: "schedule", label: "Jadwal", type: "select", options: O(["daily", "Setiap hari"], ["weekdays", "Hari kerja"], ["custom", "Fleksibel"]) },
+      { key: "targetPerWeek", label: "Target per minggu (hari)", type: "number", min: 1, max: 7 }, { key: "reminderTime", label: "Waktu pengingat", type: "time" }, { key: "notes", label: "Catatan", type: "textarea", full: true },
+    ],
+  },
+  documents: { label: "Dokumen", singular: "Dokumen", titleKey: "title", badges: ["kind"], meta: ["url", "projectId", "orgId"], defaults: { kind: "referensi" },
+    fields: [
+      { key: "title", label: "Judul", type: "text", required: true, full: true }, { key: "kind", label: "Jenis", type: "select", options: O(["proposal", "Proposal"], ["notulen", "Notulen"], ["lpj", "LPJ"], ["surat", "Surat"], ["materi", "Materi presentasi"], ["referensi", "Referensi"], ["lainnya", "Lainnya"]) },
+      { key: "url", label: "Tautan (Drive, Notion, dll.)", type: "url", full: true }, { key: "projectId", label: "Proyek", type: "relation", to: "projects" }, { key: "orgId", label: "Organisasi", type: "relation", to: "organizations" }, { key: "notes", label: "Catatan", type: "textarea", full: true },
+    ],
+  },
+  accounts: { label: "Akun", singular: "Akun", titleKey: "name", badges: ["type", "status"], defaults: { type: "bank", openingBalance: 0, status: "active" }, referencedBy: [{ col: "transactions", field: "accountId" }, { col: "transactions", field: "toAccountId" }],
+    fields: [
+      { key: "name", label: "Nama akun", type: "text", required: true, full: true, placeholder: "BSI, Dana, Dompet…" }, { key: "type", label: "Jenis", type: "select", options: O(["cash", "Cash"], ["bank", "Bank"], ["ewallet", "E-wallet"], ["saving", "Tabungan"], ["other", "Lainnya"]) },
+      { key: "openingBalance", label: "Saldo awal", type: "money" }, { key: "status", label: "Status", type: "select", options: O(["active", "Aktif"], ["closed", "Ditutup"]) }, { key: "note", label: "Catatan (jangan isi PIN/kata sandi)", type: "textarea", full: true },
+    ],
+    right: (i) => { const b = accountBalance(i); return { text: idr(b), tone: b < 0 ? "neg" : "" }; },
+  },
+  categories: { label: "Kategori", singular: "Kategori", titleKey: "name", badges: ["kind"], defaults: { kind: "expense" }, referencedBy: [{ col: "transactions", field: "categoryId" }, { col: "budgets", field: "categoryId" }],
+    fields: [{ key: "name", label: "Nama kategori", type: "text", required: true, full: true }, { key: "kind", label: "Jenis", type: "select", options: O(["income", "Pemasukan"], ["expense", "Pengeluaran"]), required: true }],
+  },
+  transactions: { label: "Transaksi", singular: "Transaksi", titleKey: "description", badges: ["type", "scope"], meta: ["date", "accountId", "categoryId", "method"], defaults: { type: "expense", scope: "personal", method: "cash" },
+    titleFn: (i) => i.description || (Store.get("categories", i.categoryId) || {}).name || (i.type === "transfer" ? "Transfer" : "Transaksi"),
+    fields: [
+      { key: "type", label: "Jenis", type: "select", options: O(["income", "Pemasukan"], ["expense", "Pengeluaran"], ["transfer", "Transfer"]), required: true }, { key: "date", label: "Tanggal", type: "date", required: true },
+      { key: "amount", label: "Jumlah (Rp)", type: "money", required: true }, { key: "accountId", label: "Dari / akun", type: "relation", to: "accounts", required: true },
+      { key: "toAccountId", label: "Ke akun", type: "relation", to: "accounts", required: true, showIf: (v) => v.type === "transfer" },
+      { key: "categoryId", label: "Kategori", type: "relation", to: "categories", showIf: (v) => v.type !== "transfer", filter: (t, v) => t.kind === v.type && !t.archived, dependsOn: ["type"] },
+      { key: "description", label: "Deskripsi", type: "text", full: true }, { key: "method", label: "Metode pembayaran", type: "select", options: O(["cash", "Tunai"], ["transfer", "Transfer bank"], ["debit", "Debit"], ["qris", "QRIS"], ["ewallet", "E-wallet"], ["other", "Lainnya"]) },
+      { key: "scope", label: "Lingkup", type: "select", options: O(["personal", "Pribadi"], ["work", "Pekerjaan"], ["organization", "Organisasi"]), hint: "Memisahkan keuangan pribadi, pekerjaan, dan organisasi di laporan." },
+      { key: "proofUrl", label: "Tautan bukti transaksi", type: "url" }, { key: "note", label: "Catatan", type: "textarea", full: true },
+    ],
+    validate: (v) => { if (!Number.isSafeInteger(v.amount) || v.amount <= 0) return "Jumlah harus lebih dari 0."; if (v.type === "transfer" && v.accountId === v.toAccountId) return "Akun asal dan tujuan transfer harus berbeda."; return null; },
+    beforeSave: (v) => (v.type === "transfer" ? { ...v, categoryId: "" } : { ...v, toAccountId: "" }),
+    right: (i) => (i.type === "income" ? { text: "+" + idr(i.amount), tone: "pos" } : i.type === "expense" ? { text: "-" + idr(i.amount), tone: "neg" } : { text: idr(i.amount), tone: "" }),
+    presets: [{ key: "all", label: "Semua", test: () => true }, { key: "month", label: "Bulan ini", test: (i, t) => String(i.date).startsWith(t.slice(0, 7)) }],
+    sorts: [{ key: "date", label: "Terbaru", by: (i) => `${i.date}${i.createdAt}`, dir: "desc" }],
+  },
+  budgets: { label: "Anggaran", singular: "Anggaran", titleKey: "month",
+    fields: [{ key: "month", label: "Bulan", type: "month", required: true }, { key: "categoryId", label: "Kategori pengeluaran", type: "relation", to: "categories", required: true, filter: (t) => t.kind === "expense" && !t.archived }, { key: "amount", label: "Anggaran (Rp)", type: "money", required: true }],
+    validate: (v) => (!Number.isSafeInteger(v.amount) || v.amount <= 0 ? "Anggaran harus lebih dari 0." : null),
+  },
+  savings: { label: "Target tabungan", singular: "Target tabungan", titleKey: "name", badges: ["status"], meta: ["target", "date"], defaults: { status: "active" }, referencedBy: [{ col: "contributions", field: "savingId" }],
+    fields: [
+      { key: "name", label: "Nama target", type: "text", required: true, full: true, placeholder: "Laptop, Dana darurat…" }, { key: "target", label: "Jumlah target (Rp)", type: "money", required: true },
+      { key: "date", label: "Target tanggal", type: "date" }, { key: "status", label: "Status", type: "select", options: O(["active", "Berjalan"], ["done", "Tercapai"], ["paused", "Ditunda"]) }, { key: "note", label: "Catatan", type: "textarea", full: true },
+    ],
+    validate: (v) => (!Number.isSafeInteger(v.target) || v.target <= 0 ? "Target harus lebih dari 0." : null),
+    progress: (i) => { const p = savingProgress(i); return { pct: p.pct, label: idr(p.saved) + " terkumpul" }; },
+  },
+  contributions: { label: "Kontribusi tabungan", singular: "Kontribusi", titleKey: "note", meta: ["date", "note"], titleFn: (i) => (Store.get("savings", i.savingId) || {}).name || "Kontribusi",
+    fields: [{ key: "savingId", label: "Target tabungan", type: "relation", to: "savings", required: true }, { key: "amount", label: "Jumlah (Rp)", type: "money", required: true }, { key: "date", label: "Tanggal", type: "date", required: true }, { key: "note", label: "Catatan", type: "text", full: true }],
+    validate: (v) => (!Number.isSafeInteger(v.amount) || v.amount <= 0 ? "Jumlah harus lebih dari 0." : null),
+    right: (i) => ({ text: "+" + idr(i.amount), tone: "pos" }), sorts: [{ key: "date", label: "Terbaru", by: (i) => i.date || "", dir: "desc" }],
+  },
+};
+for (const [k, v] of Object.entries(SCHEMA)) v.key = k;
+
+const itemTitle = (col, i) => (col.titleFn ? col.titleFn(i) : String(i[col.titleKey] ?? "")) || "(tanpa judul)";
+function fmtField(f, v) {
+  if (v === undefined || v === null || v === "") return "";
+  switch (f.type) {
+    case "date": return fmtDate(String(v));
+    case "money": return idr(Number(v));
+    case "select": return optLabel(f.options, String(v));
+    case "relation": { const t = SCHEMA[f.to]; const it = Store.get(f.to, v); return it && t ? itemTitle(t, it) : ""; }
+    case "number": return f.key === "estimate" ? v + " mnt" : f.key === "hours" ? v + " jam" : f.key === "sks" ? v + " SKS" : String(v);
+    case "checkbox": return v ? "Ya" : "";
+    default: return String(v);
+  }
+}
+
+/* ------------------------------ keuangan ------------------------------ */
+const amt = (t) => (Number.isSafeInteger(t.amount) ? t.amount : 0);
+function accountBalance(acc) {
+  let b = Number.isSafeInteger(acc.openingBalance) ? acc.openingBalance : 0;
+  for (const t of Store.list("transactions")) {
+    if (t.archived) continue;
+    if (t.type === "income" && t.accountId === acc.id) b += amt(t);
+    else if (t.type === "expense" && t.accountId === acc.id) b -= amt(t);
+    else if (t.type === "transfer") { if (t.accountId === acc.id) b -= amt(t); if (t.toAccountId === acc.id) b += amt(t); }
+  }
+  return b;
+}
+const inScope = (t, s) => s === "all" || (t.scope || "personal") === s;
+function monthTotals(month, scope = "all") {
+  let income = 0, expense = 0;
+  for (const t of Store.list("transactions")) {
+    if (t.archived || !t.date || !String(t.date).startsWith(month) || !inScope(t, scope)) continue;
+    if (t.type === "income") income += amt(t); else if (t.type === "expense") expense += amt(t);
+  }
+  return { income, expense, net: income - expense };
+}
+function spendByCategory(month, scope = "all") {
+  const m = new Map();
+  for (const t of Store.list("transactions")) {
+    if (t.archived || t.type !== "expense" || !String(t.date).startsWith(month) || !inScope(t, scope)) continue;
+    const k = t.categoryId || "_none"; m.set(k, (m.get(k) || 0) + amt(t));
+  }
+  return m;
+}
+function savingProgress(g) {
+  const saved = Store.list("contributions").filter((c) => c.savingId === g.id).reduce((s, c) => s + amt(c), 0);
+  const target = Number.isSafeInteger(g.target) && g.target > 0 ? g.target : 0;
+  return { saved, pct: target ? Math.min(100, Math.round((saved / target) * 100)) : 0 };
+}
+function toggleHabit(habitId, date) {
+  const logs = Store.list("habitLogs"); const ex = logs.find((l) => l.habitId === habitId && l.date === date); const t = nowISO();
+  const next = ex ? logs.filter((l) => l.id !== ex.id) : [...logs, { id: uid(), habitId, date, createdAt: t, updatedAt: t }];
+  return Store.commit({ ...Store.db, data: { ...Store.db.data, habitLogs: next } });
+}
+
+/* ------------------------------ pencarian ------------------------------ */
+const ROUTE = { tasks: "tasks", projects: "projects", events: "calendar", semesters: "academic", courses: "academic", assignments: "academic", exams: "academic", jobs: "work", organizations: "organization", programs: "organization", meetings: "organization", goals: "goals", notes: "notes", habits: "habits", documents: "documents", accounts: "finance", categories: "finance", transactions: "finance", budgets: "finance", savings: "finance", contributions: "finance" };
+function searchAll(q, only) {
+  const n = q.trim().toLowerCase(); if (!n) return []; const hits = [];
+  for (const col of Object.values(SCHEMA)) {
+    if (only && only !== col.key) continue;
+    for (const item of Store.list(col.key)) {
+      const title = itemTitle(col, item); let found = title.toLowerCase().includes(n), snippet = "";
+      for (const f of col.fields) {
+        if (!["text", "textarea", "tags", "select", "relation", "url"].includes(f.type)) continue;
+        const raw = item[f.key]; const text = fmtField(f, Array.isArray(raw) ? raw.join(" ") : raw);
+        if (text && text.toLowerCase().includes(n)) { found = true; if (!snippet && f.key !== col.titleKey) { const idx = text.toLowerCase().indexOf(n); snippet = `${f.label}: ${text.slice(Math.max(0, idx - 30), idx + 70)}`; } }
+      }
+      if (found) hits.push({ col: col.key, item, title, snippet, label: col.label });
+    }
+  }
+  return hits;
+}
+
+/* ------------------------------ impor / ekspor CSV ------------------------------ */
+const validDate = (s) => { if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false; const d = new Date(s + "T00:00:00Z"); return !isNaN(d) && d.toISOString().slice(0, 10) === s; };
+function csvTable(text) { const rows = parseCSV(text); if (!rows.length) return { headers: [], rows: [] }; const headers = rows[0].map((h) => h.trim()); return { headers, rows: rows.slice(1).map((r) => Object.fromEntries(headers.map((h, i) => [h, (r[i] || "").trim()]))) }; }
+function parseRupiah(s) { const c = String(s).trim().replace(/^rp\.?\s*/i, "").replace(/[.\s,](?=\d{3}(\D|$))/g, ""); if (!/^\d+$/.test(c)) return { err: "Jumlah harus bilangan bulat rupiah (tanpa desimal)" }; const n = Number(c); if (!Number.isSafeInteger(n) || n <= 0) return { err: "Jumlah harus lebih dari 0" }; return { n }; }
+function importTransactions(text) {
+  const { headers, rows } = csvTable(text); const res = { valid: [], errors: [], warnings: [] };
+  const miss = ["date", "type", "amount", "account"].filter((h) => !headers.includes(h)); if (miss.length) { res.errors.push({ row: 1, message: "Kolom wajib tidak ditemukan: " + miss.join(", ") }); return res; }
+  const alias = { income: "income", pemasukan: "income", masuk: "income", expense: "expense", pengeluaran: "expense", keluar: "expense", transfer: "transfer" };
+  const accs = Store.list("accounts"), cats = Store.list("categories"); const fa = (n) => accs.find((a) => a.name.toLowerCase() === String(n || "").trim().toLowerCase());
+  rows.forEach((r, idx) => {
+    const row = idx + 2, pr = [];
+    if (!validDate(r.date)) pr.push("Tanggal harus YYYY-MM-DD yang valid");
+    const type = alias[(r.type || "").toLowerCase()]; if (!type) pr.push("Jenis harus income/expense/transfer");
+    const m = parseRupiah(r.amount || ""); if (m.err) pr.push(m.err);
+    const acc = fa(r.account); if (!acc) pr.push(`Akun "${r.account}" tidak ditemukan`);
+    let to; if (type === "transfer") { to = fa(r.toAccount); if (!to) pr.push(`Akun tujuan "${r.toAccount || ""}" tidak ditemukan`); else if (acc && to.id === acc.id) pr.push("Akun asal dan tujuan sama"); }
+    const scope = (r.scope || "personal").toLowerCase(); if (!["personal", "work", "organization"].includes(scope)) pr.push("Lingkup harus personal/work/organization");
+    if (pr.length) { res.errors.push({ row, message: pr.join("; ") }); return; }
+    let categoryId = ""; if (type !== "transfer" && r.category) { const c = cats.find((x) => x.name.toLowerCase() === r.category.toLowerCase() && x.kind === type); if (c) categoryId = c.id; else res.warnings.push({ row, message: `Kategori "${r.category}" tidak ada; disimpan tanpa kategori` }); }
+    res.valid.push({ type, date: r.date, amount: m.n, accountId: acc.id, toAccountId: type === "transfer" ? to.id : "", categoryId, description: r.description || "", method: r.method || "other", scope, note: r.note || "", proofUrl: "" });
+  });
+  return res;
+}
+function importTasks(text) {
+  const { headers, rows } = csvTable(text); const res = { valid: [], errors: [], warnings: [] };
+  if (!headers.includes("title")) { res.errors.push({ row: 1, message: "Kolom wajib tidak ditemukan: title" }); return res; }
+  const ST = TASK_STATUS.map((x) => x.value), PR = PRIORITY.map((x) => x.value), AR = AREA.map((x) => x.value);
+  rows.forEach((r, idx) => {
+    const row = idx + 2, pr = [];
+    if (!r.title) pr.push("Judul kosong");
+    const status = (r.status || "todo").toLowerCase(); if (!ST.includes(status)) pr.push("Status harus: " + ST.join("/"));
+    const priority = (r.priority || "medium").toLowerCase(); if (!PR.includes(priority)) pr.push("Prioritas harus: " + PR.join("/"));
+    const area = (r.area || "personal").toLowerCase(); if (!AR.includes(area)) pr.push("Area harus: " + AR.join("/"));
+    for (const k of ["startDate", "dueDate"]) if (r[k] && !validDate(r[k])) pr.push(k + " harus YYYY-MM-DD yang valid");
+    let estimate = ""; if (r.estimate) { const n = Number(r.estimate); if (!Number.isInteger(n) || n < 0) pr.push("estimate harus bilangan bulat menit"); else estimate = n; }
+    if (pr.length) { res.errors.push({ row, message: pr.join("; ") }); return; }
+    res.valid.push({ title: r.title, description: r.description || "", status, priority, area, category: r.category || "", startDate: r.startDate || "", dueDate: r.dueDate || "", estimate, projectId: "", reminder: "", subtasks: [], notes: r.notes || "", completedAt: status === "done" ? r.dueDate || "" : "" });
+  });
+  return res;
+}
+const exportTransactions = () => { const an = (id) => (Store.get("accounts", id) || {}).name || "", cn = (id) => (Store.get("categories", id) || {}).name || ""; return toCSV(Store.list("transactions").map((t) => ({ date: t.date, type: t.type, amount: t.amount, account: an(t.accountId), toAccount: an(t.toAccountId), category: cn(t.categoryId), description: t.description, method: t.method, scope: t.scope, note: t.note })), ["date", "type", "amount", "account", "toAccount", "category", "description", "method", "scope", "note"]); };
+const exportTasks = () => toCSV(Store.list("tasks"), ["title", "description", "status", "priority", "area", "startDate", "dueDate", "estimate", "category", "notes"]);
+/* ============================ HAVEN UI ============================ */
+const ACT = {};      // klik: data-act
+const INP = {};      // input/change: data-inp
+const App = { page: null, drawerOpen: false };
+
+function toast(msg) {
+  let t = $("#toast"); if (!t) { t = document.createElement("div"); t.id = "toast"; document.body.appendChild(t); }
+  const d = document.createElement("div"); d.className = "toast"; d.textContent = msg; t.appendChild(d); setTimeout(() => d.remove(), 2600);
+}
+
+/* ------------------------------ modal ------------------------------ */
+const Modals = [];
+function openModal({ title, body, wide, onClose }) {
+  const ov = document.createElement("div"); ov.className = "ov";
+  ov.innerHTML = `<div class="card modal ${wide ? "wide" : ""}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="mh"><h2 class="serif" style="font-size:20px">${esc(title)}</h2><button class="icon-btn" data-act="modal-close" aria-label="Tutup">${ic("x")}</button></div><div class="mb">${body}</div></div>`;
+  ov.addEventListener("mousedown", (e) => { if (e.target === ov) closeModal(ov); });
+  document.body.appendChild(ov); ov._onClose = onClose; Modals.push(ov);
+  setTimeout(() => { const f = $("input:not([type=hidden]):not([type=checkbox]),select,textarea", ov); f && f.focus(); }, 40);
+  return ov;
+}
+function closeModal(ov) {
+  ov = ov || Modals[Modals.length - 1]; if (!ov) return;
+  const i = Modals.indexOf(ov); if (i >= 0) Modals.splice(i, 1); ov.remove(); ov._onClose && ov._onClose();
+}
+ACT["modal-close"] = (el) => closeModal(el.closest(".ov"));
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { if ($("#pal")) closePalette(); else closeModal(); } });
+
+function confirmBox({ title, text, okLabel = "Hapus", danger = true, onOk, input }) {
+  const ov = openModal({ title, body: `<p class="muted sm">${text}</p>${input ? `<input class="input" id="cf-in" style="margin-top:14px" autocomplete="off">` : ""}<div class="row" style="justify-content:flex-end;margin-top:20px"><button class="btn btn-ghost" data-act="modal-close">Batal</button><button class="btn ${danger ? "btn-danger" : "btn-primary"}" id="cf-ok" ${input ? "disabled" : ""}>${esc(okLabel)}</button></div>` });
+  const ok = $("#cf-ok", ov); if (input) $("#cf-in", ov).addEventListener("input", (e) => { ok.disabled = e.target.value !== input; });
+  ok.addEventListener("click", () => { const r = onOk(); if (r !== false) closeModal(ov); });
+  return ov;
+}
+
+/* ------------------------------ form ------------------------------ */
+let FC = null; // form context
+const optsHTML = (opts, sel, blank) => (blank ? `<option value="">${blank}</option>` : "") + opts.map((o) => `<option value="${esc(o.value)}" ${o.value === sel ? "selected" : ""}>${esc(o.label)}</option>`).join("");
+function relOptions(f, values, sel) {
+  const t = SCHEMA[f.to]; const items = Store.list(f.to).filter((x) => (!x.archived || x.id === sel) && (f.filter ? f.filter(x, values) : true));
+  return { html: optsHTML(items.map((x) => ({ value: x.id, label: itemTitle(t, x) })), sel, f.required ? "Pilih…" : "—"), empty: items.length === 0 };
+}
+function clHTML(key, list) {
+  return `<div data-cl="${key}">${list.map((c, i) => `<div class="row" style="margin-bottom:6px"><input type="checkbox" data-clc="${key}" data-i="${i}" ${c.done ? "checked" : ""}><input class="input" style="padding:6px 12px" data-clt="${key}" data-i="${i}" value="${esc(c.text)}"><button type="button" class="icon-btn del" data-act="cl-del" data-key="${key}" data-i="${i}" aria-label="Hapus butir">${ic("trash")}</button></div>`).join("")}<div class="row"><input class="input" style="padding:6px 12px" data-cln="${key}" placeholder="Tambah butir…"><button type="button" class="btn btn-ghost btn-sm" data-act="cl-add" data-key="${key}">${ic("plus")}</button></div></div>`;
+}
+function fieldHTML(f, v, values) {
+  const lab = `<label class="lbl" for="f-${f.key}">${esc(f.label)}${f.required ? ' <span class="terra">*</span>' : ""}</label>`; const id = `id="f-${f.key}" name="${f.key}"`;
+  let inner = "";
+  switch (f.type) {
+    case "textarea": inner = lab + `<textarea class="input" ${id} rows="${f.rows || 3}" placeholder="${esc(f.placeholder || "")}">${esc(v)}</textarea>`; break;
+    case "select": inner = lab + `<select class="input" ${id}>${optsHTML(f.options, v, f.required ? "" : "—")}</select>`; break;
+    case "relation": { const r = relOptions(f, values, v); inner = lab + `<select class="input" ${id}>${r.html}</select>` + (r.empty ? `<p class="xs muted" style="margin-top:4px" data-empty>Belum ada data ${esc(SCHEMA[f.to].label.toLowerCase())}. Tambahkan dulu di modulnya.</p>` : ""); break; }
+    case "money": inner = lab + `<div style="position:relative"><span class="muted sm" style="position:absolute;left:14px;top:50%;transform:translateY(-50%)">Rp</span><input class="input" style="padding-left:40px" ${id} inputmode="numeric" data-money placeholder="0" value="${typeof v === "number" ? fmtNum(v) : ""}"></div>`; break;
+    case "number": inner = lab + `<input class="input" type="number" ${id} inputmode="decimal" ${f.min != null ? `min="${f.min}"` : ""} ${f.max != null ? `max="${f.max}"` : ""} step="${f.step || 1}" value="${esc(v)}">`; break;
+    case "checkbox": inner = `<label class="row card" style="padding:12px 14px;cursor:pointer;box-shadow:none"><input type="checkbox" ${id} ${v ? "checked" : ""}> <span class="sm">${esc(f.label)}</span></label>`; break;
+    case "tags": inner = lab + `<input class="input" ${id} placeholder="fikih, ide, rapat" value="${esc((v || []).join(", "))}">`; break;
+    case "checklist": inner = lab + clHTML(f.key, v || []); break;
+    default: inner = lab + `<input class="input" type="${f.type === "url" ? "url" : f.type === "date" ? "date" : f.type === "time" ? "time" : f.type === "month" ? "month" : "text"}" ${id} placeholder="${esc(f.placeholder || "")}" value="${esc(v)}">`;
+  }
+  return `<div class="fld ${f.full || f.type === "textarea" || f.type === "checklist" ? "full" : ""} ${f.showIf && !f.showIf(values) ? "hidden" : ""}" data-k="${f.key}">${inner}${f.hint ? `<p class="xs muted" style="margin-top:4px">${esc(f.hint)}</p>` : ""}</div>`;
+}
+function initialValues(col, initial, item) {
+  const base = {}; const today = TODAY();
+  for (const f of col.fields) base[f.key] = f.type === "checkbox" ? false : f.type === "checklist" || f.type === "tags" ? [] : "";
+  const d = { ...(col.defaults || {}) };
+  if (!item) for (const f of col.fields) { if (f.type === "date" && f.required) d[f.key] = today; if (f.type === "month" && f.required) d[f.key] = today.slice(0, 7); }
+  return { ...base, ...d, ...(initial || {}), ...(item ? JSON.parse(JSON.stringify(item)) : {}) };
+}
+function openForm(colKey, { item, initial, onSaved } = {}) {
+  const col = SCHEMA[colKey]; const values = initialValues(col, initial, item);
+  const body = `<form id="frm" class="fgrid" novalidate>${col.fields.map((f) => fieldHTML(f, values[f.key], values)).join("")}<div class="full err hidden" id="frm-err" role="alert"></div><div class="full row" style="justify-content:flex-end"><button type="button" class="btn btn-ghost" data-act="modal-close">Batal</button><button class="btn btn-primary" type="submit">Simpan</button></div></form>`;
+  const ov = openModal({ title: `${item ? "Ubah" : "Tambah"} ${col.singular.toLowerCase()}`, body, wide: col.fields.length > 8, onClose: () => { if (FC && FC.ov === ov) FC = null; } });
+  FC = { col, item, values, ov, onSaved };
+  $("#frm", ov).addEventListener("submit", (e) => { e.preventDefault(); submitForm(); });
+  return ov;
+}
+function readValues() {
+  const { col, ov, values } = FC; const out = { ...values };
+  for (const f of col.fields) {
+    const el = $(`[name="${f.key}"]`, ov);
+    if (f.type === "checklist") continue;
+    if (!el) continue;
+    if (f.type === "checkbox") out[f.key] = el.checked;
+    else if (f.type === "money") out[f.key] = parseMoney(el.value) ?? "";
+    else if (f.type === "number") out[f.key] = el.value === "" ? "" : Number(el.value);
+    else if (f.type === "tags") out[f.key] = el.value.split(",").map((t) => t.trim()).filter(Boolean);
+    else out[f.key] = el.value;
+  }
+  FC.values = out; return out;
+}
+function refreshFormVisibility() {
+  const v = readValues();
+  for (const f of FC.col.fields) {
+    const w = $(`.fld[data-k="${f.key}"]`, FC.ov); if (w && f.showIf) w.classList.toggle("hidden", !f.showIf(v));
+    if (f.type === "relation" && f.filter) { const sel = $(`select[name="${f.key}"]`, FC.ov); if (sel) { const cur = sel.value; const r = relOptions(f, v, cur); sel.innerHTML = r.html; if (![...sel.options].some((o) => o.value === cur)) sel.value = ""; } }
+  }
+}
+function submitForm() {
+  const { col, item, ov, onSaved } = FC; const v = readValues(); const err = $("#frm-err", ov);
+  const fail = (m) => { err.textContent = m; err.classList.remove("hidden"); };
+  const vis = col.fields.filter((f) => !f.showIf || f.showIf(v));
+  for (const f of vis) {
+    const x = v[f.key];
+    if (f.required && (x === "" || x == null || (Array.isArray(x) && !x.length))) return fail(`"${f.label}" wajib diisi.`);
+    if (f.type === "number" && x !== "" && x != null) { const n = Number(x); if (!Number.isFinite(n) || (f.min != null && n < f.min) || (f.max != null && n > f.max)) return fail(`"${f.label}" harus ${f.min != null ? "≥ " + f.min : ""}${f.max != null ? " dan ≤ " + f.max : ""}.`); }
+  }
+  let out = {};
+  for (const f of col.fields) { const show = !f.showIf || f.showIf(v); out[f.key] = show ? v[f.key] : f.type === "checkbox" ? false : f.type === "checklist" || f.type === "tags" ? [] : ""; }
+  if (item) for (const [k, x] of Object.entries(item)) if (!(k in out) && !["id", "createdAt", "updatedAt"].includes(k)) out[k] = x;
+  if (col.beforeSave) out = col.beforeSave(out, TODAY());
+  const problem = col.validate && col.validate(out); if (problem) return fail(problem);
+  const saved = item ? Store.update(col.key, item.id, out) && item : Store.add(col.key, out);
+  if (!saved) return fail("Gagal menyimpan ke penyimpanan browser (mungkin penuh). Unduh backup lalu kosongkan sebagian data.");
+  toast("Tersimpan"); closeModal(ov); onSaved && onSaved(saved);
+}
+/* delegasi event form */
+document.addEventListener("input", (e) => {
+  const t = e.target;
+  if (FC && FC.ov.contains(t)) {
+    if (t.matches("[data-money]")) { const n = parseMoney(t.value); t.value = n == null ? "" : fmtNum(n); }
+    if (t.dataset.clt) { const l = FC.values[t.dataset.clt]; l[+t.dataset.i].text = t.value; }
+    else if (t.name) refreshFormVisibility();
+  }
+  const name = t.dataset && t.dataset.inp; if (name && INP[name]) INP[name](t, e);
+});
+document.addEventListener("change", (e) => {
+  const t = e.target;
+  if (FC && FC.ov.contains(t)) { if (t.dataset.clc) { FC.values[t.dataset.clc][+t.dataset.i].done = t.checked; } else if (t.name) refreshFormVisibility(); }
+  const name = t.dataset && t.dataset.chg; if (name && INP[name]) INP[name](t, e);
+});
+ACT["cl-add"] = (el) => {
+  const key = el.dataset.key; const inp = $(`[data-cln="${key}"]`, FC.ov); const txt = inp.value.trim(); if (!txt) return;
+  FC.values[key] = [...(FC.values[key] || []), { id: uid(), text: txt, done: false }]; $(`[data-cl="${key}"]`, FC.ov).outerHTML = clHTML(key, FC.values[key]); $(`[data-cln="${key}"]`, FC.ov).focus();
+};
+document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.dataset && e.target.dataset.cln) { e.preventDefault(); ACT["cl-add"]({ dataset: { key: e.target.dataset.cln } }); } });
+ACT["cl-del"] = (el) => { const key = el.dataset.key; FC.values[key].splice(+el.dataset.i, 1); $(`[data-cl="${key}"]`, FC.ov).outerHTML = clHTML(key, FC.values[key]); };
+
+/* klik global */
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const fn = ACT[el.dataset.act]; if (fn) { e.preventDefault(); fn(el, e); }
+});
+
+/* ------------------------------ komponen kecil ------------------------------ */
+const bar = (pct) => `<div class="bar"><i style="width:${clamp(pct, 0, 100)}%"></i></div>`;
+const ring = (pct, size = 64) => { const r = (size - 6) / 2, c = 2 * Math.PI * r; return `<span class="ring" style="width:${size}px;height:${size}px"><svg width="${size}" height="${size}" style="transform:rotate(-90deg)"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="rgb(var(--line))" stroke-width="6"/><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="rgb(var(--accent))" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c - (c * clamp(pct, 0, 100)) / 100}" style="transition:stroke-dashoffset 1s"/></svg><b>${Math.round(pct)}%</b></span>`; };
+const empty = (title, hint, btn) => `<div class="empty"><svg width="64" height="40" viewBox="0 0 64 40" fill="none" class="sage" style="margin:0 auto 14px;display:block"><path d="M2 38 22 10l12 16 8-10 20 22Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="48" cy="9" r="4" stroke="rgb(var(--amber))" stroke-width="1.5"/></svg><p class="t serif">${esc(title)}</p>${hint ? `<p class="muted sm" style="margin-top:4px">${esc(hint)}</p>` : ""}${btn ? `<div style="margin-top:16px">${btn}</div>` : ""}</div>`;
+const tabsHTML = (tabs, cur, act) => `<div class="tabs">${tabs.map((t) => `<button class="tab ${t.key === cur ? "on" : ""}" data-act="${act}" data-k="${t.key}">${esc(t.label)}</button>`).join("")}</div>`;
+const pageHead = (title, sub, action = "") => `<div class="row between wrap" style="align-items:flex-end;margin-bottom:24px;gap:12px"><div><h1 class="page serif">${esc(title)}</h1>${sub ? `<p class="muted sm" style="margin-top:4px">${esc(sub)}</p>` : ""}</div>${action}</div>`;
+const badge = (v, l) => `<span class="chip ${esc(v)}">${esc(l)}</span>`;
+
+/* ------------------------------ koleksi generik ------------------------------ */
+const MV = {};
+const mvs = (k) => (MV[k] ||= { q: "", preset: "all", group: "none", sort: (SCHEMA[k].sorts || [])[0]?.key || "created", filters: {}, arch: false, view: "list" });
+function mountCollection(host, colKey) {
+  const col = SCHEMA[colKey]; const st = mvs(colKey); const items = Store.list(colKey);
+  const ff = (col.badges || []).map((k) => col.fields.find((f) => f.key === k)).filter((f) => f && f.type === "select");
+  host.innerHTML = `<div data-col="${colKey}">
+    <div class="row wrap" style="margin-bottom:16px"><div class="grow" style="min-width:180px;position:relative"><span class="muted" style="position:absolute;left:14px;top:50%;transform:translateY(-50%)">${ic("search")}</span><input class="input" style="padding-left:40px" placeholder="Cari ${esc(col.label.toLowerCase())}…" data-inp="mv-q" value="${esc(st.q)}"></div>
+      ${col.sorts && col.sorts.length > 1 ? `<select class="input" style="width:auto" data-chg="mv-sort" aria-label="Urutkan">${col.sorts.map((s) => `<option value="${s.key}" ${st.sort === s.key ? "selected" : ""}>Urut: ${esc(s.label)}</option>`).join("")}</select>` : ""}
+      ${col.groupings ? `<select class="input" style="width:auto" data-chg="mv-group" aria-label="Kelompokkan">${col.groupings.map((g) => `<option value="${g.key}" ${st.group === g.key ? "selected" : ""}>${esc(g.label)}</option>`).join("")}</select>` : ""}
+      ${col.kanban ? `<div class="row" style="border:1px solid rgb(var(--line));border-radius:99px;padding:2px;gap:0"><button class="icon-btn ${st.view === "list" ? "btn-primary" : ""}" style="${st.view === "list" ? "background:rgb(var(--ink));color:rgb(var(--bg))" : ""}" data-act="mv-view" data-v="list" aria-label="List">${ic("list")}</button><button class="icon-btn" style="${st.view === "kanban" ? "background:rgb(var(--ink));color:rgb(var(--bg))" : ""}" data-act="mv-view" data-v="kanban" aria-label="Kanban">${ic("kanban")}</button></div>` : ""}
+      <button class="btn btn-accent" data-act="new" data-col="${colKey}">${ic("plus")} Tambah</button></div>
+    ${col.presets && col.presets.length > 1 ? `<div class="row wrap" style="margin-bottom:12px;gap:6px">${col.presets.map((p) => `<button class="pill ${st.preset === p.key ? "on" : ""}" data-act="mv-preset" data-k="${p.key}">${esc(p.label)}</button>`).join("")}</div>` : ""}
+    ${ff.length ? `<div class="row wrap" style="margin-bottom:16px">${ff.map((f) => `<select class="input" style="width:auto;padding:6px 12px;font-size:12px" data-chg="mv-filter" data-f="${f.key}" aria-label="${esc(f.label)}"><option value="">${esc(f.label)}: semua</option>${optsHTML(f.options, st.filters[f.key])}</select>`).join("")}${items.some((i) => i.archived) ? `<label class="row xs muted"><input type="checkbox" data-chg="mv-arch" ${st.arch ? "checked" : ""}> Tampilkan arsip</label>` : ""}</div>` : ""}
+    <div id="mv-res"></div></div>`;
+  App.page = { refresh: () => renderResults(host, colKey), host, colKey };
+  renderResults(host, colKey);
+}
+function visibleItems(colKey) {
+  const col = SCHEMA[colKey], st = mvs(colKey), today = TODAY(), n = st.q.trim().toLowerCase();
+  let list = Store.list(colKey).filter((i) => st.arch || !i.archived);
+  const p = (col.presets || []).find((x) => x.key === st.preset); if (p) list = list.filter((i) => p.test(i, today));
+  for (const [k, v] of Object.entries(st.filters)) if (v) list = list.filter((i) => i[k] === v);
+  if (n) list = list.filter((i) => [itemTitle(col, i), ...col.fields.filter((f) => ["text", "textarea", "tags", "select", "relation"].includes(f.type)).map((f) => fmtField(f, Array.isArray(i[f.key]) ? i[f.key].join(" ") : i[f.key]))].join(" ").toLowerCase().includes(n));
+  const s = (col.sorts || []).find((x) => x.key === st.sort); const by = s ? s.by : (i) => i.createdAt; const mult = s ? (s.dir === "desc" ? -1 : 1) : -1;
+  return [...list].sort((a, b) => { const x = by(a), y = by(b); return (typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y))) * mult; });
+}
+function renderResults(host, colKey) {
+  const col = SCHEMA[colKey], st = mvs(colKey), res = $("#mv-res", host); if (!res) return; const items = Store.list(colKey);
+  const list = visibleItems(colKey);
+  if (!items.length) { res.innerHTML = empty(`Belum ada ${col.label.toLowerCase()}`, "Mulai dengan menambahkan data pertamamu. Semua bisa diisi langsung dari sini.", `<button class="btn btn-accent" data-act="new" data-col="${colKey}">${ic("plus")} Tambah ${esc(col.singular.toLowerCase())}</button>`); return; }
+  if (!list.length) { res.innerHTML = empty("Tidak ada yang cocok", "Coba ubah kata kunci atau filter."); return; }
+  if (st.view === "kanban" && col.kanban) { res.innerHTML = kanbanHTML(col, list); return; }
+  const g = (col.groupings || []).find((x) => x.key === st.group); let groups;
+  if (!g || g.key === "none") groups = [["", list]]; else { const m = new Map(); for (const i of list) { const k = g.by(i); m.set(k, [...(m.get(k) || []), i]); } groups = [...m.entries()]; }
+  res.innerHTML = groups.map(([name, its]) => `${name ? `<h3 class="xs muted" style="text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin:20px 0 8px">${esc(name)} · ${its.length}</h3>` : ""}<div class="stack">${its.map((i) => itemCard(col, i)).join("")}</div>`).join("");
+}
+function itemCard(col, i) {
+  const today = TODAY(); const prog = col.progress && col.progress(i), sub = col.subtitle && col.subtitle(i), right = col.right && col.right(i);
+  const isDone = col.doneKey ? i[col.doneKey.field] === col.doneKey.done : false;
+  const dueF = col.fields.find((f) => f.key === "dueDate" || f.key === "deadline"); const due = dueF ? i[dueF.key] : "";
+  const late = due && !isDone && due < today, soon = due && !isDone && !late && due <= addDays(today, 2);
+  const metas = (col.meta || []).map((k) => col.fields.find((f) => f.key === k)).filter(Boolean).map((f) => ({ f, t: fmtField(f, i[f.key]) })).filter((m) => m.t);
+  const list = col.key === "tasks" ? i.subtasks : i.milestones; const lk = col.key === "tasks" ? "subtasks" : "milestones";
+  return `<div class="card item ${i.archived ? "arch" : ""}">
+    ${col.doneKey ? `<button class="chk ${isDone ? "on" : ""}" data-act="toggle-done" data-col="${col.key}" data-id="${i.id}" aria-label="${isDone ? "Tandai belum selesai" : "Tandai selesai"}">${isDone ? ic("ck") : ""}</button>` : ""}
+    <div class="grow"><div class="row wrap" style="gap:4px 8px"><span style="font-weight:500" class="${isDone ? "done-t" : ""}">${esc(itemTitle(col, i))}</span>${i.favorite ? '<span class="amber">★</span>' : ""}${i.archived ? '<span class="chip">Arsip</span>' : ""}${(col.badges || []).map((k) => { const f = col.fields.find((x) => x.key === k); return f && i[k] ? badge(String(i[k]), fmtField(f, i[k])) : ""; }).join("")}</div>
+      ${sub ? `<p class="xs muted" style="margin-top:4px">${esc(sub)}</p>` : ""}${col.key === "notes" && i.body ? `<p class="sm muted" style="margin-top:4px;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(String(i.body).slice(0, 180))}</p>` : ""}
+      ${metas.length ? `<p class="xs muted row wrap" style="margin-top:6px;gap:2px 12px">${metas.map((m) => (m.f.type === "url" ? `<a href="${esc(m.t)}" target="_blank" rel="noopener noreferrer" class="accent" style="text-decoration:underline">Buka tautan</a>` : `<span class="${m.f.key === (dueF && dueF.key) ? (late ? "terra" : soon ? "amber" : "") : ""}">${m.f.key === (dueF && dueF.key) ? "Tenggat " : ""}${esc(m.t)}${m.f.key === (dueF && dueF.key) && late ? " · terlambat" : ""}</span>`)).join("")}</p>` : ""}
+      ${Array.isArray(i.tags) && i.tags.length ? `<p class="row wrap" style="margin-top:6px;gap:4px">${i.tags.map((t) => `<span class="chip">#${esc(t)}</span>`).join("")}</p>` : ""}
+      ${Array.isArray(list) && list.length ? `<div style="margin-top:8px">${list.map((s) => `<label class="row xs" style="margin-top:4px"><input type="checkbox" data-chg="sub-toggle" data-col="${col.key}" data-id="${i.id}" data-lk="${lk}" data-sid="${s.id}" ${s.done ? "checked" : ""}><span class="${s.done ? "done-t" : ""}">${esc(s.text)}</span></label>`).join("")}</div>` : ""}
+      ${prog ? `<div class="row" style="margin-top:10px;gap:12px"><div class="grow">${bar(prog.pct)}</div><span class="xs muted" style="white-space:nowrap">${prog.pct}% · ${esc(prog.label)}</span></div>` : ""}</div>
+    ${right ? `<div class="num ${right.tone === "pos" ? "sage" : right.tone === "neg" ? "terra" : ""}" style="font-weight:600;font-size:14px;align-self:flex-start;white-space:nowrap">${esc(right.text)}</div>` : ""}
+    <div class="acts"><button class="icon-btn" data-act="edit" data-col="${col.key}" data-id="${i.id}" aria-label="Ubah">${ic("edit")}</button>${col.key !== "transactions" ? `<button class="icon-btn" data-act="archive" data-col="${col.key}" data-id="${i.id}" aria-label="${i.archived ? "Pulihkan" : "Arsipkan"}">${ic("archive")}</button>` : ""}<button class="icon-btn del" data-act="del" data-col="${col.key}" data-id="${i.id}" aria-label="Hapus">${ic("trash")}</button></div></div>`;
+}
+function kanbanHTML(col, list) {
+  const f = col.fields.find((x) => x.key === col.kanban);
+  return `<div class="kan">${f.options.map((o) => { const its = list.filter((i) => i[f.key] === o.value); return `<div class="kcol" data-kcol="${o.value}" data-col="${col.key}" data-kf="${f.key}"><div class="row between" style="margin-bottom:8px;padding:0 4px"><b class="sm">${esc(o.label)}</b><span class="chip">${its.length}</span></div>${its.map((i) => `<div class="card kcard" draggable="true" data-kid="${i.id}" data-act="edit" data-col="${col.key}" data-id="${i.id}"><b style="font-weight:500">${esc(itemTitle(col, i))}</b><div class="xs muted row wrap" style="margin-top:4px;gap:4px 8px">${i.priority ? badge(i.priority, i.priority) : ""}${i.dueDate || i.deadline || i.endDate ? `<span>${fmtDate(i.dueDate || i.deadline || i.endDate)}</span>` : ""}</div></div>`).join("")}${its.length ? "" : '<p class="xs muted" style="text-align:center;padding:16px 0">Seret kartu ke sini</p>'}</div>`; }).join("")}</div>`;
+}
+const rr = () => App.page && App.page.refresh && App.page.refresh();
+INP["mv-q"] = (t) => { const c = t.closest("[data-col]").dataset.col; mvs(c).q = t.value; rr(); };
+INP["mv-sort"] = (t) => { mvs(t.closest("[data-col]").dataset.col).sort = t.value; rr(); };
+INP["mv-group"] = (t) => { mvs(t.closest("[data-col]").dataset.col).group = t.value; rr(); };
+INP["mv-filter"] = (t) => { mvs(t.closest("[data-col]").dataset.col).filters[t.dataset.f] = t.value; rr(); };
+INP["mv-arch"] = (t) => { mvs(t.closest("[data-col]").dataset.col).arch = t.checked; rr(); };
+INP["sub-toggle"] = (t) => { const { col, id, lk, sid } = t.dataset; const it = Store.get(col, id); Store.update(col, id, { [lk]: (it[lk] || []).map((x) => (x.id === sid ? { ...x, done: t.checked } : x)) }); };
+ACT["mv-view"] = (el) => { const c = el.closest("[data-col]").dataset.col; mvs(c).view = el.dataset.v; mountCollection(App.page.host, c); };
+ACT["mv-preset"] = (el) => { const c = el.closest("[data-col]").dataset.col; mvs(c).preset = el.dataset.k; mountCollection(App.page.host, c); };
+ACT.new = (el) => openForm(el.dataset.col);
+ACT.edit = (el) => { const it = Store.get(el.dataset.col, el.dataset.id); if (it) openForm(el.dataset.col, { item: it }); };
+ACT.archive = (el) => { const it = Store.get(el.dataset.col, el.dataset.id); Store.update(el.dataset.col, it.id, { archived: !it.archived }); };
+ACT["toggle-done"] = (el) => {
+  const col = SCHEMA[el.dataset.col], it = Store.get(col.key, el.dataset.id), dk = col.doneKey; const next = it[dk.field] === dk.done ? dk.undone : dk.done;
+  const patch = { [dk.field]: next }; if (col.key === "tasks") patch.completedAt = next === "done" ? TODAY() : ""; Store.update(col.key, it.id, patch);
+};
+ACT.del = (el) => {
+  const col = SCHEMA[el.dataset.col], it = Store.get(col.key, el.dataset.id); if (!it) return;
+  const ov = confirmBox({ title: "Hapus data?", text: `“${esc(itemTitle(col, it))}” akan dihapus permanen. Jika hanya ingin menyembunyikan, gunakan Arsip.`, onOk: () => { const r = Store.remove(col.key, it); if (!r.ok) { let m = $("#del-msg", ov); if (!m) { m = document.createElement("p"); m.id = "del-msg"; m.className = "err"; m.style.marginTop = "12px"; m.setAttribute("role", "alert"); $(".mb", ov).insertBefore(m, $(".mb", ov).children[1]); } m.textContent = r.message; return false; } toast("Dihapus"); } });
+};
+/* drag & drop kanban */
+document.addEventListener("dragstart", (e) => { const c = e.target.closest && e.target.closest("[data-kid]"); if (c) e.dataTransfer.setData("text/plain", c.dataset.kid); });
+document.addEventListener("dragover", (e) => { const c = e.target.closest && e.target.closest("[data-kcol]"); if (c) { e.preventDefault(); $$(".kcol.over").forEach((x) => x !== c && x.classList.remove("over")); c.classList.add("over"); } });
+document.addEventListener("dragleave", (e) => { const c = e.target.closest && e.target.closest("[data-kcol]"); if (c && !c.contains(e.relatedTarget)) c.classList.remove("over"); });
+document.addEventListener("drop", (e) => {
+  const c = e.target.closest && e.target.closest("[data-kcol]"); if (!c) return; e.preventDefault(); c.classList.remove("over");
+  const id = e.dataTransfer.getData("text/plain"); if (!id) return; const { col, kf, kcol } = c.dataset; const patch = { [kf]: kcol };
+  if (col === "tasks") patch.completedAt = kcol === "done" ? TODAY() : ""; Store.update(col, id, patch);
+});
+/* ============================ HAVEN pages (1) ============================ */
+const MODULES = {
+  tasks: { title: "Tugas", sub: "Semua pekerjaan dan tenggat dalam satu tempat — list atau kanban.", tabs: ["tasks"] },
+  projects: { title: "Proyek", sub: "Proyek akademik, pekerjaan, organisasi, dan pribadi. Progres dihitung dari tugas & milestone.", tabs: ["projects"] },
+  academic: { title: "Akademik", sub: "Semester, mata kuliah, tugas, dan ujian.", tabs: ["assignments", "exams", "courses", "semesters"] },
+  work: { title: "Pekerjaan", sub: "Klien, proyek kerja, jam, dan pendapatan — terpisah dari keuangan pribadi.", tabs: ["jobs"] },
+  organization: { title: "Organisasi", sub: "Program kerja, rapat, dan anggaran organisasi.", tabs: ["programs", "meetings", "organizations"] },
+  goals: { title: "Tujuan", sub: "Rencana hidup dari harian sampai jangka panjang, dipecah jadi milestone.", tabs: ["goals"] },
+  notes: { title: "Knowledge Vault", sub: "Catatan kuliah, ide, evaluasi, dan referensi.", tabs: ["notes"] },
+  documents: { title: "Dokumen", sub: "Pusat tautan dokumen penting: proposal, notulen, LPJ, dan referensi.", tabs: ["documents"] },
+};
+const MODTAB = {};
+function pageModule(host, slug) {
+  const m = MODULES[slug]; const cur = MODTAB[slug] || m.tabs[0];
+  host.innerHTML = pageHead(m.title, m.sub) + (m.tabs.length > 1 ? tabsHTML(m.tabs.map((k) => ({ key: k, label: SCHEMA[k].label })), cur, "mod-tab") : "") + `<div id="mod-host" data-slug="${slug}"></div>`;
+  mountCollection($("#mod-host", host), cur);
+}
+ACT["mod-tab"] = (el) => { const slug = $("#mod-host").dataset.slug; MODTAB[slug] = el.dataset.k; pageModule($("#view"), slug); };
+
+/* ------------------------------ angka animasi ------------------------------ */
+function animateNumbers(root) {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  $$("[data-count]", root).forEach((el) => {
+    const to = Number(el.dataset.count), f = el.dataset.fmt === "idr" ? idr : fmtNum; if (reduce || !isFinite(to)) { el.textContent = f(to); return; }
+    const t0 = performance.now(), dur = 900;
+    const step = (t) => { const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = f(Math.round(to * e)); if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
+const num = (n, fmt) => `<span data-count="${n}" ${fmt ? `data-fmt="${fmt}"` : ""}>${fmt === "idr" ? idr(n) : fmtNum(n)}</span>`;
+
+/* ------------------------------ dashboard ------------------------------ */
+function sec(title, href, body, cls = "", delay = 0) {
+  return `<section class="card p5 ${cls}" style="animation:rise .6s ${delay}s both"><div class="row between" style="margin-bottom:16px"><h2 class="sec">${esc(title)}</h2>${href ? `<a href="#/${href}" class="xs accent row" style="gap:4px">Buka ${ic("arrow").replace('class="i ', 'class="i " style="width:12px;height:12px" data-x="')}</a>` : ""}</div>${body}</section>`;
+}
+function pageDashboard(host) {
+  const tz = S().timezone, today = TODAY(), month = today.slice(0, 7);
+  const tasks = Store.list("tasks").filter((t) => !t.archived), open = tasks.filter((t) => t.status !== "done"), overdue = open.filter((t) => t.dueDate && t.dueDate < today);
+  const focus = [...open].filter((t) => (t.dueDate && t.dueDate <= today) || t.priority === "urgent" || t.status === "doing").sort((a, b) => (PRANK[a.priority] ?? 9) - (PRANK[b.priority] ?? 9) || (a.dueDate || "9999").localeCompare(b.dueDate || "9999")).slice(0, 3);
+  const events = Store.list("events").filter((e) => !e.archived && e.date === today).sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
+  const examsToday = Store.list("exams").filter((e) => !e.archived && e.date === today);
+  const dl = [];
+  const push = (col, list, key, skip = true) => { for (const i of list) { if (i.archived || !i[key] || (skip && i.status === "done")) continue; if (i[key] >= today && i[key] <= addDays(today, 14)) dl.push({ id: i.id, col, title: itemTitle(SCHEMA[col], i), date: i[key] }); } };
+  push("tasks", tasks, "dueDate"); push("assignments", Store.list("assignments"), "dueDate"); push("exams", Store.list("exams"), "date", false); push("jobs", Store.list("jobs"), "deadline"); dl.sort((a, b) => a.date.localeCompare(b.date));
+  const projects = Store.list("projects").filter((p) => !p.archived && p.status !== "done").slice(0, 4);
+  const goals = Store.list("goals").filter((g) => !g.archived && g.status === "active").slice(0, 4);
+  const habits = Store.list("habits").filter((h) => !h.archived), logs = Store.list("habitLogs");
+  const accounts = Store.list("accounts").filter((a) => !a.archived && a.status !== "closed"); const balance = accounts.reduce((s, a) => s + accountBalance(a), 0);
+  const totals = monthTotals(month), spend = spendByCategory(month);
+  const nb = Store.list("budgets").filter((b) => b.month === month).map((b) => ({ b, spent: spend.get(b.categoryId) || 0 })).filter((x) => x.b.amount > 0 && x.spent / x.b.amount >= 0.8).sort((a, b) => b.spent / b.b.amount - a.spent / a.b.amount)[0];
+  const sem = Store.list("semesters").find((s) => s.status === "active" && !s.archived);
+  const aOpen = Store.list("assignments").filter((a) => !a.archived && a.status !== "done").length;
+  const exUp = Store.list("exams").filter((e) => !e.archived && e.status !== "done" && e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+  const recent = []; for (const [c, items] of Object.entries(Store.db.data)) { if (!SCHEMA[c] || c === "categories") continue; for (const item of items) recent.push({ c, item }); } recent.sort((a, b) => b.item.updatedAt.localeCompare(a.item.updatedAt));
+  const h = Math.floor(minutesNow(tz) / 60), greet = h < 4 ? "Selamat malam" : h < 11 ? "Selamat pagi" : h < 15 ? "Selamat siang" : h < 18 ? "Selamat sore" : "Selamat malam";
+  const dateText = parseYMD(today).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const summary = [overdue.length ? `${overdue.length} tugas terlambat` : null, focus.length ? `${focus.length} fokus hari ini` : null, events.length ? `${events.length} agenda` : null].filter(Boolean).join(" · ") || "Hari yang tenang. Tambahkan sesuatu lewat tombol +.";
+  const catName = (id) => (Store.get("categories", id) || {}).name || "kategori";
+  const tlabel = (v) => optLabel(AREA, v);
+
+  host.innerHTML = `<header style="margin-bottom:24px;animation:rise .5s both"><p class="muted sm">${esc(dateText)}</p><h1 class="serif" style="font-size:clamp(30px,5vw,50px);line-height:1.1;margin-top:4px">${greet}, ${esc(S().name)}.</h1><p class="muted sm" style="margin-top:8px">${esc(summary)}</p></header>
+  <div class="grid g3">
+  ${sec("Daily Focus", "tasks", focus.length ? `<div class="stack">${focus.map((t, i) => `<div class="row card" style="padding:12px 16px;box-shadow:none;gap:12px"><span class="serif accent" style="font-size:20px;width:20px">${i + 1}</span><button class="chk" data-act="dash-done" data-id="${t.id}" aria-label="Selesaikan tugas"></button><div class="grow"><p class="trunc sm" style="font-weight:500">${esc(t.title)}</p><p class="xs ${t.dueDate && t.dueDate < today ? "terra" : "muted"}">${t.dueDate ? `Tenggat ${fmtDate(t.dueDate)}${t.dueDate < today ? " · terlambat" : ""}` : "Tanpa tenggat"}</p></div>${badge(t.priority, t.priority)}</div>`).join("")}</div>` : empty("Belum ada prioritas hari ini", "Tugas yang jatuh tempo, urgent, atau sedang dikerjakan akan muncul di sini.", `<button class="btn btn-accent" data-act="new" data-col="tasks">Tambah tugas</button>`), "col2", 0.05)}
+  ${sec("Task Overview", "tasks", `<div class="grid g3" style="gap:10px;text-align:center">${[["Belum selesai", open.length, ""], ["Terlambat", overdue.length, overdue.length ? "terra" : ""], ["Selesai", tasks.length - open.length, ""]].map(([l, v, c]) => `<div class="card" style="box-shadow:none;padding:16px 4px;background:rgb(var(--bg)/.6)"><p class="serif ${c}" style="font-size:30px">${num(v)}</p><p class="tiny muted">${l}</p></div>`).join("")}</div><div style="margin-top:16px">${bar(tasks.length ? ((tasks.length - open.length) / tasks.length) * 100 : 0)}<p class="xs muted" style="margin-top:8px">${tasks.length ? Math.round(((tasks.length - open.length) / tasks.length) * 100) + "% dari seluruh tugas selesai" : "Belum ada tugas"}</p></div>`, "", 0.1)}
+  ${sec("Today's Schedule", "calendar", events.length + examsToday.length ? `<div class="stack">${events.map((e) => `<div class="row sm" style="gap:12px"><span class="xs muted num" style="width:92px;flex:none">${e.allDay ? "Sepanjang hari" : esc(e.startTime) + (e.endTime ? "–" + esc(e.endTime) : "")}</span><span class="grow trunc">${esc(e.title)}</span>${badge(e.category, tlabel(e.category))}</div>`).join("")}${examsToday.map((e) => `<div class="row sm" style="gap:12px"><span class="xs muted" style="width:92px;flex:none">${esc(e.startTime || "Ujian")}</span><span class="grow trunc terra" style="font-weight:500">${esc(e.title)}</span></div>`).join("")}</div>` : `<p class="muted sm" style="text-align:center;padding:24px 0">Tidak ada agenda hari ini.</p>`, "", 0.15)}
+  ${sec("Upcoming Deadlines", "", dl.length ? `<div class="stack">${dl.slice(0, 6).map((x) => { const left = daysBetween(today, x.date); return `<a href="#/${ROUTE[x.col]}" class="row sm" style="gap:12px"><span class="xs ${left <= 1 ? "amber" : "muted"}" style="width:56px;flex:none;${left <= 1 ? "font-weight:600" : ""}">${left === 0 ? "Hari ini" : left === 1 ? "Besok" : left + " hari"}</span><span class="grow trunc">${esc(x.title)}</span><span class="chip">${esc(SCHEMA[x.col].singular)}</span></a>`; }).join("")}</div>` : `<p class="muted sm" style="text-align:center;padding:24px 0">Tidak ada tenggat 14 hari ke depan.</p>`, "", 0.2)}
+  ${sec("Financial Pulse", "finance", `<p class="xs muted">Total saldo</p><p class="serif" style="font-size:30px">${num(balance, "idr")}</p><div class="grid g2" style="gap:10px;margin-top:16px"><div style="background:rgb(var(--sage)/.1);border-radius:16px;padding:12px"><p class="tiny muted">Masuk · ${esc(monthLabel(month))}</p><p class="sage sm" style="font-weight:600">${idr(totals.income)}</p></div><div style="background:rgb(var(--terra)/.1);border-radius:16px;padding:12px"><p class="tiny muted">Keluar</p><p class="terra sm" style="font-weight:600">${idr(totals.expense)}</p></div></div>${nb ? `<p class="xs amber" style="margin-top:12px">Anggaran ${esc(catName(nb.b.categoryId))} sudah ${Math.round((nb.spent / nb.b.amount) * 100)}% terpakai.</p>` : ""}${accounts.length ? "" : `<p class="xs muted" style="margin-top:12px">Tambahkan akun di menu Keuangan untuk mulai mencatat.</p>`}`, "", 0.25)}
+  ${sec("Project Overview", "projects", projects.length ? `<div class="stack-lg">${projects.map((p) => { const pr = SCHEMA.projects.progress(p); return `<div><div class="row between sm" style="margin-bottom:6px"><span class="trunc">${esc(p.name)}</span><span class="xs muted">${pr.pct}%</span></div>${bar(pr.pct)}</div>`; }).join("")}</div>` : `<p class="muted sm" style="text-align:center;padding:24px 0">Belum ada proyek aktif.</p>`, "", 0.3)}
+  ${sec("Academic Snapshot", "academic", `<p class="sm">${sem ? esc(sem.name) : "Belum ada semester aktif"}</p><div class="grid g2" style="gap:10px;margin-top:12px;text-align:center"><div class="card" style="box-shadow:none;padding:12px;background:rgb(var(--bg)/.6)"><p class="serif" style="font-size:24px">${num(aOpen)}</p><p class="tiny muted">Tugas kuliah</p></div><div class="card" style="box-shadow:none;padding:12px;background:rgb(var(--bg)/.6)"><p class="serif" style="font-size:24px">${num(exUp.length)}</p><p class="tiny muted">Ujian mendatang</p></div></div>${exUp[0] ? `<p class="xs muted" style="margin-top:12px">Berikutnya: ${esc(exUp[0].title)} · ${fmtDate(exUp[0].date)}</p>` : ""}`, "", 0.35)}
+  ${sec("Goal Progress", "goals", goals.length ? `<div class="grid g2" style="text-align:center">${goals.map((g) => `<div class="stack" style="margin:0;display:flex;flex-direction:column;align-items:center;gap:8px">${ring(SCHEMA.goals.progress(g).pct)}<p class="xs">${esc(g.name)}</p></div>`).join("")}</div>` : `<p class="muted sm" style="text-align:center;padding:24px 0">Belum ada tujuan aktif.</p>`, "", 0.4)}
+  ${sec("Habit Tracker", "habits", habits.length ? `<div class="stack">${habits.slice(0, 6).map((hb) => { const d = logs.some((l) => l.habitId === hb.id && l.date === today); return `<button class="row sm" style="gap:12px;width:100%;text-align:left;padding:4px 6px;border-radius:12px" data-act="dash-habit" data-id="${hb.id}"><span class="chk ${d ? "on" : ""}" style="margin:0">${d ? ic("ck") : ""}</span><span class="${d ? "done-t" : ""}">${esc(hb.name)}</span></button>`; }).join("")}</div>` : `<p class="muted sm" style="text-align:center;padding:24px 0">Belum ada kebiasaan.</p>`, "", 0.45)}
+  ${sec("Recent Activity", "", recent.length ? `<div class="grid g2" style="gap:6px">${recent.slice(0, 6).map((r) => `<a href="#/${ROUTE[r.c]}" class="row sm" style="gap:12px;padding:8px 10px;border-radius:12px"><span class="chip">${esc(SCHEMA[r.c].singular)}</span><span class="grow trunc">${esc(itemTitle(SCHEMA[r.c], r.item))}</span></a>`).join("")}</div>` : `<p class="muted sm" style="text-align:center;padding:24px 0">Belum ada aktivitas.</p>`, "col2", 0.5)}
+  ${sec("Quick Capture", "", `<div class="row wrap">${[["tasks", "Tugas"], ["events", "Acara"], ["transactions", "Transaksi"], ["notes", "Catatan"], ["goals", "Tujuan"], ["projects", "Proyek"]].map(([c, l]) => `<button class="btn btn-ghost" data-act="new" data-col="${c}">+ ${l}</button>`).join("")}</div>`, "", 0.55)}
+  </div>`;
+  App.page = { refresh: () => pageDashboard(host) };
+  animateNumbers(host);
+}
+ACT["dash-done"] = (el) => Store.update("tasks", el.dataset.id, { status: "done", completedAt: TODAY() });
+ACT["dash-habit"] = (el) => toggleHabit(el.dataset.id, TODAY());
+
+/* ------------------------------ kalender ------------------------------ */
+const CAL = { view: "month", cursor: null };
+const HOUR_PX = 48;
+function markersOn(date) {
+  const out = []; const add = (col, items, field, skip) => { for (const i of items) { if (i.archived || i[field] !== date) continue; if (skip && i.status === "done") continue; out.push({ col, item: i, title: itemTitle(SCHEMA[col], i), time: col === "exams" ? i.startTime : "" }); } };
+  add("tasks", Store.list("tasks"), "dueDate", true); add("assignments", Store.list("assignments"), "dueDate", true); add("exams", Store.list("exams"), "date", false); add("jobs", Store.list("jobs"), "deadline", true); return out;
+}
+const allDayOn = (d) => Store.list("events").filter((e) => !e.archived && e.date === d && e.allDay);
+const timedOn = (d) => Store.list("events").filter((e) => !e.archived && e.date === d && !e.allDay && e.startTime).sort((a, b) => a.startTime.localeCompare(b.startTime));
+const evChip = (e) => `<button class="ev ${esc(e.category)}" data-act="edit" data-col="events" data-id="${e.id}">${!e.allDay ? `<span class="muted">${esc(e.startTime)}</span> ` : ""}${esc(e.title)}</button>`;
+const mkChip = (m) => `<button class="ev mk" data-act="edit" data-col="${m.col}" data-id="${m.item.id}">◷ ${m.time ? esc(m.time) + " " : ""}${esc(m.title)}</button>`;
+function pageCalendar(host) {
+  const today = TODAY(); if (!CAL.cursor) CAL.cursor = today; const ws = S().weekStart, cur = CAL.cursor;
+  let title; const d = parseYMD(cur);
+  if (CAL.view === "month") title = d.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+  else if (CAL.view === "day") title = d.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  else if (CAL.view === "week") { const s = startOfWeek(cur, ws); title = `${fmtDate(s, { day: "numeric", month: "short" })} – ${fmtDate(addDays(s, 6), { day: "numeric", month: "short", year: "numeric" })}`; }
+  else title = "Agenda mulai " + fmtDate(cur);
+  let body = "";
+  if (CAL.view === "month") body = calMonth(cur, today, ws); else if (CAL.view === "agenda") body = calAgenda(cur);
+  else body = calGrid(CAL.view === "day" ? [cur] : Array.from({ length: 7 }, (_, i) => addDays(startOfWeek(cur, ws), i)), today);
+  host.innerHTML = pageHead("Kalender", "Agenda berjam tampil sesuai durasinya. Tugas dan ujian hanya muncul sebagai penanda tenggat, bukan blok waktu.", `<button class="btn btn-accent" data-act="cal-new" data-date="${cur}">${ic("plus")} Acara baru</button>`) +
+    `<div class="row between wrap" style="margin-bottom:16px"><div class="row card" style="padding:4px;gap:2px;box-shadow:none"><button class="icon-btn" data-act="cal-nav" data-d="-1" aria-label="Sebelumnya">${ic("left")}</button><button class="btn btn-sm" data-act="cal-today">Hari ini</button><button class="icon-btn" data-act="cal-nav" data-d="1" aria-label="Berikutnya">${ic("right")}</button></div><h2 class="serif" style="font-size:20px;text-transform:capitalize">${esc(title)}</h2></div>` +
+    tabsHTML([{ key: "month", label: "Bulanan" }, { key: "week", label: "Mingguan" }, { key: "day", label: "Harian" }, { key: "agenda", label: "Agenda" }], CAL.view, "cal-view") + body;
+  App.page = { refresh: () => { const sc = $("#tgs"); const y = sc ? sc.scrollTop : null; pageCalendar(host); const n = $("#tgs"); if (n && y != null) n.scrollTop = y; } };
+  const sc = $("#tgs"); if (sc) sc.scrollTop = 7 * HOUR_PX - 8;
+  startNowLine();
+}
+function calMonth(cur, today, ws) {
+  const start = startOfWeek(cur.slice(0, 7) + "-01", ws), labels = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"], head = ws === 1 ? [...labels.slice(1), labels[0]] : labels;
+  const cells = Array.from({ length: 42 }, (_, i) => addDays(start, i));
+  return `<div class="card" style="overflow:hidden"><div class="cal">${head.map((h) => `<div class="h">${h}</div>`).join("")}${cells.map((d) => {
+    const inM = d.slice(0, 7) === cur.slice(0, 7), chips = [...allDayOn(d).map(evChip), ...timedOn(d).map(evChip), ...markersOn(d).map(mkChip)];
+    return `<div class="cell ${inM ? "" : "out"}"><div class="row between" style="margin-bottom:4px"><button class="dn ${d === today ? "today" : ""}" data-act="cal-day" data-date="${d}">${Number(d.slice(8))}</button><button class="icon-btn" style="padding:1px" data-act="cal-new" data-date="${d}" aria-label="Tambah acara">${ic("plus").replace('class="i ', 'class="i " style="width:12px;height:12px" data-x="')}</button></div>${chips.slice(0, 3).join("")}${chips.length > 3 ? `<button class="tiny muted" data-act="cal-day" data-date="${d}">+${chips.length - 3} lagi</button>` : ""}</div>`;
+  }).join("")}</div></div>`;
+}
+function laneLayout(events) {
+  const endOf = (e) => (e.endTime ? mins(e.endTime) : mins(e.startTime) + 45), out = [];
+  for (const e of events) { const s = mins(e.startTime); let lane = 0; while (out.some((o) => o.lane === lane && o.end > s && endOf(o.e) > s)) lane++; out.push({ e, lane, end: endOf(e) }); }
+  const count = Math.max(1, ...out.map((o) => o.lane + 1)); return out.map((o) => ({ e: o.e, lane: o.lane, count }));
+}
+function calGrid(days, today) {
+  const n = days.length, cols = `3.5rem repeat(${n},minmax(0,1fr))`;
+  const head = days.map((d) => `<div style="border-left:1px solid rgb(var(--line)/.7);padding:6px;min-width:0"><p class="xs ${d === today ? "accent" : "muted"}" style="text-align:center;${d === today ? "font-weight:600" : ""}">${esc(parseYMD(d).toLocaleDateString("id-ID", { weekday: "short", day: "numeric" }))}</p>${allDayOn(d).map(evChip).join("")}${markersOn(d).map(mkChip).join("")}</div>`).join("");
+  const labels = Array.from({ length: 24 }, (_, h) => (h ? `<span class="tiny muted" style="position:absolute;right:8px;top:${h * HOUR_PX}px;transform:translateY(-50%)">${pad(h)}:00</span>` : "")).join("");
+  const colsHTML = days.map((d, ci) => `<div class="tgc" data-act="cal-slot" data-date="${d}" style="left:calc(3.5rem + (100% - 3.5rem) * ${ci} / ${n});width:calc((100% - 3.5rem) / ${n})">${Array.from({ length: 24 }, (_, h) => `<div class="tgl" style="top:${h * HOUR_PX}px"></div>`).join("")}${d === today ? `<div class="now" id="now" style="top:0"></div>` : ""}${laneLayout(timedOn(d)).map(({ e, lane, count }) => { const s = mins(e.startTime), hasEnd = !!e.endTime, h = hasEnd ? Math.max(22, ((mins(e.endTime) - s) / 60) * HOUR_PX) : 30; return `<button class="blk ${esc(e.category)}" data-act="edit" data-col="events" data-id="${e.id}" style="top:${(s / 60) * HOUR_PX}px;height:${h}px;left:${(lane / count) * 100 + 1}%;width:${100 / count - 2}%"><b style="display:block;font-weight:500" class="trunc">${esc(e.title)}</b><span class="muted">${esc(e.startTime)}${hasEnd ? "–" + esc(e.endTime) : ""}</span></button>`; }).join("")}</div>`).join("");
+  return `<div class="card" style="overflow:hidden"><div style="display:grid;grid-template-columns:${cols};border-bottom:1px solid rgb(var(--line));background:rgb(var(--bg)/.6)"><div></div>${head}</div><div id="tgs" style="max-height:560px;overflow-y:auto"><div class="tg" style="position:relative">${labels}${colsHTML}</div></div></div>`;
+}
+function calAgenda(from) {
+  const days = Array.from({ length: 30 }, (_, i) => addDays(from, i)).filter((d) => allDayOn(d).length + timedOn(d).length + markersOn(d).length > 0);
+  if (!days.length) return empty("Tidak ada agenda 30 hari ke depan", "Tambahkan acara atau beri tenggat pada tugas.");
+  return `<div class="stack-lg">${days.map((d) => `<div class="card p4"><p class="sm" style="font-weight:600;text-transform:capitalize;margin-bottom:12px">${esc(parseYMD(d).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" }))}</p><div class="stack">${[...allDayOn(d), ...timedOn(d)].map((e) => `<button class="row sm" style="width:100%;text-align:left;gap:12px" data-act="edit" data-col="events" data-id="${e.id}"><span class="xs muted" style="width:110px;flex:none">${e.allDay ? "Sepanjang hari" : esc(e.startTime) + (e.endTime ? "–" + esc(e.endTime) : "")}</span><span class="grow trunc blk ${esc(e.category)}" style="position:static;padding:4px 8px">${esc(e.title)}</span>${e.location ? `<span class="xs muted">${esc(e.location)}</span>` : ""}</button>`).join("")}${markersOn(d).map((m) => `<button class="row sm" style="width:100%;text-align:left;gap:12px" data-act="edit" data-col="${m.col}" data-id="${m.item.id}"><span class="xs muted" style="width:110px;flex:none">Tenggat${m.time ? " · " + esc(m.time) : ""}</span><span class="grow trunc muted" style="border:1px dashed rgb(var(--muted)/.5);border-radius:8px;padding:4px 8px">${esc(m.title)}</span><span class="chip">${esc(SCHEMA[m.col].singular)}</span></button>`).join("")}</div></div>`).join("")}</div>`;
+}
+let nowTimer = null;
+function startNowLine() { clearInterval(nowTimer); const upd = () => { const el = $("#now"); if (!el) { clearInterval(nowTimer); return; } el.style.top = (minutesNow(S().timezone) / 60) * HOUR_PX + "px"; }; upd(); nowTimer = setInterval(upd, 60000); }
+ACT["cal-view"] = (el) => { CAL.view = el.dataset.k; pageCalendar($("#view")); };
+ACT["cal-today"] = () => { CAL.cursor = TODAY(); pageCalendar($("#view")); };
+ACT["cal-nav"] = (el) => { const d = Number(el.dataset.d); if (CAL.view === "month") CAL.cursor = addMonths(CAL.cursor.slice(0, 7), d) + "-01"; else if (CAL.view === "week") CAL.cursor = addDays(CAL.cursor, 7 * d); else if (CAL.view === "day") CAL.cursor = addDays(CAL.cursor, d); else CAL.cursor = addDays(CAL.cursor, 14 * d); pageCalendar($("#view")); };
+ACT["cal-day"] = (el) => { CAL.cursor = el.dataset.date; CAL.view = "day"; pageCalendar($("#view")); };
+ACT["cal-new"] = (el) => openForm("events", { initial: { date: el.dataset.date } });
+ACT["cal-slot"] = (el, e) => { if (e.target !== el) return; const r = el.getBoundingClientRect(); const m = Math.floor(((e.clientY - r.top) / HOUR_PX) * 2) * 30; openForm("events", { initial: { date: el.dataset.date, startTime: `${pad(Math.floor(m / 60))}:${pad(m % 60)}` } }); };
+/* ============================ HAVEN pages (2) ============================ */
+
+/* ------------------------------ grafik sederhana ------------------------------ */
+function barsHTML(labels, series, fmt = fmtNum) {
+  const max = Math.max(1, ...series.flatMap((s) => s.values.map((v) => Math.abs(v))));
+  return `<div class="ch">${labels.map((l, i) => `<div class="b"><div class="row" style="align-items:flex-end;height:calc(100% - 20px);gap:3px;width:100%;justify-content:center">${series.map((s) => { const v = s.values[i], neg = v < 0; return `<i title="${esc(s.name)}: ${esc(fmt(v))}" style="height:${(Math.abs(v) / max) * 100}%;background:${neg ? "rgb(var(--terra))" : s.color};max-width:${series.length > 1 ? 24 : 44}px"></i>`; }).join("")}</div><span>${esc(l)}</span></div>`).join("")}</div>${series.length > 1 ? `<div class="row xs muted" style="justify-content:center;gap:16px;margin-top:8px">${series.map((s) => `<span class="row" style="gap:6px"><i style="width:10px;height:10px;border-radius:3px;background:${s.color};display:inline-block"></i>${esc(s.name)}</span>`).join("")}</div>` : ""}`;
+}
+function donutHTML(parts, fmt) {
+  const total = parts.reduce((s, p) => s + p.value, 0); if (!total) return `<p class="muted sm" style="text-align:center;padding:48px 0">Belum ada data.</p>`;
+  const colors = ["#7a8b6f", "#c46a4c", "#d99a3a", "#8d6fc7", "#5f8fa8", "#b5748a", "#9aa05a", "#7a7a7a"]; const r = 70, c = 2 * Math.PI * r; let off = 0;
+  const segs = parts.map((p, i) => { const len = (p.value / total) * c; const s = `<circle cx="90" cy="90" r="${r}" fill="none" stroke="${colors[i % colors.length]}" stroke-width="26" stroke-dasharray="${len} ${c - len}" stroke-dashoffset="${-off}"><title>${esc(p.name)}: ${esc(fmt(p.value))}</title></circle>`; off += len; return s; }).join("");
+  return `<div class="row wrap" style="gap:20px;justify-content:center"><svg width="180" height="180" viewBox="0 0 180 180" style="transform:rotate(-90deg)">${segs}</svg><div class="stack xs" style="min-width:150px">${parts.map((p, i) => `<div class="row" style="gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:${colors[i % colors.length]}"></i><span class="grow trunc">${esc(p.name)}</span><span class="num muted">${esc(fmt(p.value))}</span></div>`).join("")}</div></div>`;
+}
+
+/* ------------------------------ keuangan ------------------------------ */
+const FIN = { tab: "summary", month: null, scope: "all", bmonth: null, sav: "savings" };
+function monthPicker(act, month) { return `<div class="row card" style="padding:4px;gap:2px;box-shadow:none;display:inline-flex"><button class="icon-btn" data-act="${act}" data-d="-1" aria-label="Bulan sebelumnya">${ic("left")}</button><span class="sm" style="min-width:150px;text-align:center;font-weight:500">${esc(monthLabel(month))}</span><button class="icon-btn" data-act="${act}" data-d="1" aria-label="Bulan berikutnya">${ic("right")}</button></div>`; }
+function pageFinance(host) {
+  const today = TODAY(); FIN.month ||= today.slice(0, 7); FIN.bmonth ||= today.slice(0, 7);
+  const tabs = [{ key: "summary", label: "Ringkasan" }, { key: "transactions", label: "Transaksi" }, { key: "accounts", label: "Akun" }, { key: "budgets", label: "Anggaran" }, { key: "savings", label: "Tabungan" }, { key: "categories", label: "Kategori" }];
+  host.innerHTML = pageHead("Keuangan", "Pencatatan manual. Semua laporan dihitung dari transaksi yang tersimpan; jangan simpan PIN atau kata sandi bank di sini.") + tabsHTML(tabs, FIN.tab, "fin-tab") + `<div id="fin-host"></div>`;
+  const fh = $("#fin-host", host);
+  const render = () => {
+    if (FIN.tab === "summary") { fh.innerHTML = finSummary(); App.page = { refresh: render, host }; }
+    else if (FIN.tab === "budgets") { fh.innerHTML = finBudgets(); App.page = { refresh: render, host }; }
+    else if (FIN.tab === "savings") { fh.innerHTML = tabsHTML([{ key: "savings", label: "Target" }, { key: "contributions", label: "Kontribusi" }], FIN.sav, "fin-sav") + `<div id="sav-host"></div>`; mountCollection($("#sav-host", fh), FIN.sav); }
+    else mountCollection(fh, FIN.tab);
+  };
+  render();
+}
+function finSummary() {
+  const month = FIN.month, scope = FIN.scope, accounts = Store.list("accounts").filter((a) => !a.archived), txs = Store.list("transactions"), cats = Store.list("categories");
+  if (!accounts.length && !txs.length) return empty("Mulai dari akun pertamamu", "Tambahkan akun (Cash, Bank, E-wallet) di tab Akun, lalu catat transaksi pertama.", `<button class="btn btn-accent" data-act="new" data-col="accounts">Tambah akun</button>`);
+  const cur = monthTotals(month, scope), prev = monthTotals(addMonths(month, -1), scope), spend = [...spendByCategory(month, scope).entries()].sort((a, b) => b[1] - a[1]);
+  const balance = accounts.filter((a) => a.status !== "closed").reduce((s, a) => s + accountBalance(a), 0);
+  const labels = [], inc = [], exp = [];
+  for (let i = 5; i >= 0; i--) { const m = addMonths(month, -i), t = monthTotals(m, scope); labels.push(m.slice(5) + "/" + m.slice(2, 4)); inc.push(t.income); exp.push(t.expense); }
+  const diff = prev.expense > 0 ? Math.round(((cur.expense - prev.expense) / prev.expense) * 100) : null;
+  return `<div class="row between wrap" style="margin-bottom:16px">${monthPicker("fin-month", month)}<div class="row wrap" style="gap:6px">${[["all", "Semua"], ["personal", "Pribadi"], ["work", "Pekerjaan"], ["organization", "Organisasi"]].map(([k, l]) => `<button class="pill ${scope === k ? "on" : ""}" data-act="fin-scope" data-k="${k}">${l}</button>`).join("")}</div></div>
+  <div class="grid g4"><div class="card p5"><p class="xs muted">Total saldo semua akun</p><p class="serif" style="font-size:24px;margin-top:4px">${num(balance, "idr")}</p></div><div class="card p5"><p class="xs muted">Pemasukan</p><p class="serif sage" style="font-size:24px;margin-top:4px">${num(cur.income, "idr")}</p></div><div class="card p5"><p class="xs muted">Pengeluaran</p><p class="serif terra" style="font-size:24px;margin-top:4px">${num(cur.expense, "idr")}</p>${diff !== null ? `<p class="tiny muted" style="margin-top:4px">${diff === 0 ? "Sama dengan" : diff > 0 ? "Naik " + diff + "% dari" : "Turun " + Math.abs(diff) + "% dari"} bulan lalu</p>` : ""}</div><div class="card p5"><p class="xs muted">Arus kas bersih</p><p class="serif ${cur.net < 0 ? "terra" : ""}" style="font-size:24px;margin-top:4px">${idr(cur.net)}</p></div></div>
+  ${scope === "all" ? `<p class="xs muted" style="margin:12px 0">Ringkasan “Semua” menggabungkan lingkup pribadi, pekerjaan, dan organisasi. Pilih salah satu lingkup agar laporan tidak tercampur.</p>` : ""}
+  <div class="grid g2" style="margin-top:16px"><div class="card p5"><h2 class="sec" style="margin-bottom:16px">Pengeluaran per kategori</h2>${spend.length ? `<div class="stack-lg">${spend.slice(0, 8).map(([id, v]) => `<div><div class="row between sm" style="margin-bottom:4px"><span>${esc((cats.find((c) => c.id === id) || {}).name || "Tanpa kategori")}</span><span class="num">${idr(v)}</span></div>${bar(cur.expense ? (v / cur.expense) * 100 : 0)}</div>`).join("")}</div>` : `<p class="muted sm" style="text-align:center;padding:32px 0">Belum ada pengeluaran bulan ini.</p>`}</div>
+  <div class="card p5"><h2 class="sec" style="margin-bottom:8px">Pemasukan vs pengeluaran (6 bulan)</h2>${barsHTML(labels, [{ name: "Pemasukan", color: "rgb(var(--sage))", values: inc }, { name: "Pengeluaran", color: "rgb(var(--terra))", values: exp }], idr)}</div></div>
+  <div class="card p5" style="margin-top:16px"><h2 class="sec" style="margin-bottom:16px">Saldo per akun</h2>${accounts.length ? `<div class="grid g3" style="gap:8px">${accounts.map((a) => { const b = accountBalance(a); return `<div class="row between sm card" style="padding:12px 16px;box-shadow:none;background:rgb(var(--bg)/.6)"><span>${esc(a.name)}${a.status === "closed" ? ' <span class="chip">Ditutup</span>' : ""}</span><b class="num ${b < 0 ? "terra" : ""}">${idr(b)}</b></div>`; }).join("")}</div>` : `<p class="muted sm">Belum ada akun.</p>`}</div>`;
+}
+function finBudgets() {
+  const m = FIN.bmonth, spend = spendByCategory(m, "all"), budgets = Store.list("budgets").filter((b) => b.month === m), cats = Store.list("categories");
+  const tb = budgets.reduce((s, b) => s + b.amount, 0), ts = budgets.reduce((s, b) => s + (spend.get(b.categoryId) || 0), 0);
+  return `<div class="row between wrap" style="margin-bottom:16px">${monthPicker("fin-bmonth", m)}<button class="btn btn-accent" data-act="bud-new">${ic("plus")} Tambah anggaran</button></div>` +
+    (!budgets.length ? empty(`Belum ada anggaran ${monthLabel(m)}`, "Tetapkan batas per kategori. Pengeluaran dihitung otomatis dari transaksi.", `<button class="btn btn-accent" data-act="bud-new">Tambah anggaran</button>`) :
+    `<div class="card" style="overflow:hidden"><table class="t"><thead><tr><th>Kategori</th><th class="r">Anggaran</th><th class="r">Terpakai</th><th class="r">Sisa</th><th></th></tr></thead><tbody>${budgets.map((b) => { const sp = spend.get(b.categoryId) || 0, left = b.amount - sp, pct = b.amount ? (sp / b.amount) * 100 : 0; return `<tr><td><button style="font-weight:500;text-align:left" data-act="edit" data-col="budgets" data-id="${b.id}">${esc((cats.find((c) => c.id === b.categoryId) || {}).name || "—")}</button><div style="max-width:190px;margin-top:6px">${bar(pct)}</div></td><td class="r num">${idr(b.amount)}</td><td class="r num">${idr(sp)}</td><td class="r num" style="font-weight:600;color:rgb(var(${left < 0 ? "--terra" : pct >= 80 ? "--amber" : "--sage"}))">${idr(left)}</td><td><button class="icon-btn del" data-act="del" data-col="budgets" data-id="${b.id}" aria-label="Hapus anggaran">${ic("trash")}</button></td></tr>`; }).join("")}</tbody><tfoot><tr style="background:rgb(var(--bg)/.6);font-weight:600"><td style="padding:12px 16px">Total</td><td class="r num" style="padding:12px 16px">${idr(tb)}</td><td class="r num" style="padding:12px 16px">${idr(ts)}</td><td class="r num" style="padding:12px 16px">${idr(tb - ts)}</td><td></td></tr></tfoot></table></div>`);
+}
+ACT["fin-tab"] = (el) => { FIN.tab = el.dataset.k; pageFinance($("#view")); };
+ACT["fin-sav"] = (el) => { FIN.sav = el.dataset.k; pageFinance($("#view")); };
+ACT["fin-month"] = (el) => { FIN.month = addMonths(FIN.month, Number(el.dataset.d)); App.page.refresh(); };
+ACT["fin-bmonth"] = (el) => { FIN.bmonth = addMonths(FIN.bmonth, Number(el.dataset.d)); App.page.refresh(); };
+ACT["fin-scope"] = (el) => { FIN.scope = el.dataset.k; App.page.refresh(); };
+ACT["bud-new"] = () => openForm("budgets", { initial: { month: FIN.bmonth } });
+
+/* ------------------------------ kebiasaan ------------------------------ */
+function pageHabits(host) {
+  const today = TODAY(), ws = S().weekStart, weekStart = startOfWeek(today, ws), week = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const habits = Store.list("habits").filter((h) => !h.archived), logs = Store.list("habitLogs"), has = (hid, d) => logs.some((l) => l.habitId === hid && l.date === d);
+  host.innerHTML = pageHead("Kebiasaan", "Pantau konsistensi, bukan kesempurnaan. Tidak ada streak yang menghukum — satu hari terlewat tidak menghapus progresmu.", `<button class="btn btn-accent" data-act="new" data-col="habits">${ic("plus")} Kebiasaan baru</button>`) +
+    (!habits.length ? empty("Belum ada kebiasaan", "Contoh: membaca, olahraga, evaluasi harian, meninjau pengeluaran.", `<button class="btn btn-accent" data-act="new" data-col="habits">Tambah kebiasaan</button>`) :
+    `<div class="stack-lg">${habits.map((h) => {
+      const wd = week.filter((d) => has(h.id, d)).length, target = Number(h.targetPerWeek) || 7, gs = addDays(weekStart, -49), grid = Array.from({ length: 56 }, (_, i) => addDays(gs, i));
+      const total = logs.filter((l) => l.habitId === h.id).length, l28 = Array.from({ length: 28 }, (_, i) => addDays(today, -i)).filter((d) => has(h.id, d)).length;
+      return `<div class="card p5"><div class="row between" style="align-items:flex-start"><div><p style="font-weight:500">${esc(h.name)}</p><p class="xs muted">Minggu ini ${wd}/${target} hari${h.reminderTime ? " · pengingat " + esc(h.reminderTime) : ""}</p></div><div class="row" style="gap:0"><button class="icon-btn" data-act="edit" data-col="habits" data-id="${h.id}" aria-label="Ubah">${ic("edit")}</button><button class="icon-btn del" data-act="del" data-col="habits" data-id="${h.id}" aria-label="Hapus">${ic("trash")}</button></div></div>
+      <div class="grid" style="grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px">${week.map((d) => { const on = has(h.id, d), fut = d > today; return `<button ${fut ? "disabled" : ""} data-act="habit-day" data-id="${h.id}" data-date="${d}" aria-label="${d} ${on ? "selesai" : "belum"}" class="card" style="box-shadow:none;border-radius:16px;padding:8px 0;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;${on ? "border-color:rgb(var(--sage));background:rgb(var(--sage)/.15);color:rgb(var(--sage))" : d === today ? "border-color:rgb(var(--accent)/.6)" : ""};${fut ? "opacity:.4;cursor:default" : ""}">${esc(parseYMD(d).toLocaleDateString("id-ID", { weekday: "short" }))}<span class="chk ${on ? "on" : ""}" style="margin:0;${on ? "" : "background:rgb(var(--line)/.6);border:0;color:rgb(var(--ink))"};font-size:11px">${on ? ic("ck") : Number(d.slice(8))}</span></button>`; }).join("")}</div>
+      <div class="row" style="margin-top:16px;gap:12px"><div class="grow">${bar((wd / target) * 100)}</div><span class="xs muted" style="white-space:nowrap">${Math.min(100, Math.round((wd / target) * 100))}% target mingguan</span></div>
+      <p class="tiny muted" style="margin:16px 0 8px;text-transform:uppercase;letter-spacing:.08em">8 minggu terakhir · ${l28}/28 hari terakhir · total ${total}</p><div class="dots">${grid.map((d) => `<i title="${d}" class="${d > today ? "f" : has(h.id, d) ? "on" : ""}"></i>`).join("")}</div>${h.notes ? `<p class="xs muted" style="margin-top:12px">${esc(h.notes)}</p>` : ""}</div>`;
+    }).join("")}</div>`);
+  App.page = { refresh: () => pageHabits(host) };
+}
+ACT["habit-day"] = (el) => toggleHabit(el.dataset.id, el.dataset.date);
+
+/* ------------------------------ analitik ------------------------------ */
+function pageAnalytics(host) {
+  const today = TODAY(), month = today.slice(0, 7), tasks = Store.list("tasks").filter((t) => !t.archived), txs = Store.list("transactions"), habits = Store.list("habits").filter((h) => !h.archived), logs = Store.list("habitLogs");
+  host.innerHTML = pageHead("Analitik", "Semua grafik dihitung langsung dari data yang tersimpan.");
+  if (!tasks.length && !txs.length && !habits.length) { host.innerHTML += empty("Belum ada data untuk dianalisis", "Tambahkan tugas, transaksi, atau kebiasaan — grafik akan muncul otomatis."); return; }
+  const byStatus = TASK_STATUS.map((s) => tasks.filter((t) => t.status === s.value).length);
+  const ws = startOfWeek(today, S().weekStart), wl = [], wv = [];
+  for (let i = 7; i >= 0; i--) { const st = addDays(ws, -7 * i), en = addDays(st, 6); wl.push(st.slice(5)); wv.push(tasks.filter((t) => t.completedAt && t.completedAt >= st && t.completedAt <= en).length); }
+  const cats = Store.list("categories"), spend = [...spendByCategory(month).entries()].map(([id, v]) => ({ name: (cats.find((c) => c.id === id) || {}).name || "Tanpa kategori", value: v })).sort((a, b) => b.value - a.value);
+  const fl = [], fv = []; for (let i = 5; i >= 0; i--) { const m = addMonths(month, -i); fl.push(m.slice(5) + "/" + m.slice(2, 4)); fv.push(monthTotals(m).net); }
+  const hb = habits.map((h) => ({ name: h.name, v: Array.from({ length: 28 }, (_, i) => addDays(today, -i)).filter((d) => logs.some((l) => l.habitId === h.id && l.date === d)).length }));
+  const card = (t, b, cls = "") => `<div class="card p5 ${cls}"><h2 class="sec" style="margin-bottom:12px">${esc(t)}</h2>${b}</div>`;
+  host.innerHTML += `<div class="grid g2">${card("Tugas per status", barsHTML(TASK_STATUS.map((s) => s.label), [{ name: "Tugas", color: "rgb(var(--sage))", values: byStatus }]))}${card("Tugas selesai per minggu (8 minggu)", barsHTML(wl, [{ name: "Selesai", color: "rgb(var(--accent))", values: wv }]))}${card("Pengeluaran " + monthLabel(month), donutHTML(spend, idr))}${card("Arus kas bersih (6 bulan)", barsHTML(fl, [{ name: "Neto", color: "rgb(var(--sage))", values: fv }], idr))}${hb.length ? card("Konsistensi kebiasaan (hari terpenuhi dalam 28 hari)", `<div class="stack-lg">${hb.map((h) => `<div><div class="row between sm" style="margin-bottom:4px"><span>${esc(h.name)}</span><span class="xs muted">${h.v}/28</span></div>${bar((h.v / 28) * 100)}</div>`).join("")}</div>`, "col2") : ""}</div>`;
+  App.page = { refresh: () => pageAnalytics(host) };
+}
+
+/* ------------------------------ pencarian ------------------------------ */
+const SEARCH = { q: "", only: "" }; const RECENT_KEY = "haven:recent-searches";
+function pageSearch(host) {
+  host.innerHTML = pageHead("Pencarian", "Cari di seluruh modul: tugas, catatan, proyek, transaksi, dokumen, dan lainnya.") + `<div class="row wrap" style="margin-bottom:20px"><div class="grow" style="min-width:220px;position:relative"><span class="muted" style="position:absolute;left:16px;top:50%;transform:translateY(-50%)">${ic("search")}</span><input id="sq" class="input" style="padding-left:44px" placeholder="mis. rapat program kerja" data-inp="search-q" value="${esc(SEARCH.q)}"></div><select class="input" style="width:auto" data-chg="search-only" aria-label="Filter jenis"><option value="">Semua jenis</option>${Object.values(SCHEMA).map((c) => `<option value="${c.key}" ${SEARCH.only === c.key ? "selected" : ""}>${esc(c.label)}</option>`).join("")}</select></div><div id="sres"></div>`;
+  App.page = { refresh: () => renderSearch() }; renderSearch(); const i = $("#sq"); i && i.focus();
+}
+function renderSearch() {
+  const r = $("#sres"); if (!r) return; const q = SEARCH.q.trim();
+  if (!q) { let rec = []; try { rec = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); } catch {} r.innerHTML = rec.length ? `<p class="xs muted" style="text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Pencarian terakhir</p><div class="row wrap">${rec.map((x) => `<button class="chip" data-act="search-recent" data-q="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : empty("Ketik untuk mencari", "Tip: tekan Ctrl/⌘ + K dari halaman mana pun."); return; }
+  const hits = searchAll(q, SEARCH.only); if (!hits.length) { r.innerHTML = empty("Tidak ditemukan", `Tidak ada hasil untuk “${q}”.`); return; }
+  const m = new Map(); for (const h of hits) m.set(h.col, [...(m.get(h.col) || []), h]);
+  r.innerHTML = [...m.entries()].map(([col, list]) => `<h3 class="xs muted" style="text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin:20px 0 8px">${esc(SCHEMA[col].label)} · ${list.length}</h3><div class="stack">${list.slice(0, 15).map((h) => `<a class="card p4" style="display:block;padding:12px 16px" href="#/${ROUTE[h.col]}"><p class="sm" style="font-weight:500">${esc(h.title)}</p>${h.snippet ? `<p class="xs muted trunc" style="margin-top:2px">${esc(h.snippet)}</p>` : ""}</a>`).join("")}</div>`).join("");
+}
+INP["search-q"] = (t) => { SEARCH.q = t.value; renderSearch(); };
+INP["search-only"] = (t) => { SEARCH.only = t.value; renderSearch(); };
+ACT["search-recent"] = (el) => { SEARCH.q = el.dataset.q; pageSearch($("#view")); };
+function rememberSearch() { const t = SEARCH.q.trim(); if (t.length < 2) return; try { const rec = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); localStorage.setItem(RECENT_KEY, JSON.stringify([t, ...rec.filter((x) => x !== t)].slice(0, 6))); } catch {} }
+document.addEventListener("focusout", (e) => { if (e.target.id === "sq") rememberSearch(); });
+
+/* ------------------------------ pengaturan ------------------------------ */
+const ZONES = [["Asia/Jakarta", "WIB (Asia/Jakarta)"], ["Asia/Makassar", "WITA (Asia/Makassar)"], ["Asia/Jayapura", "WIT (Asia/Jayapura)"], ["Asia/Kuala_Lumpur", "Kuala Lumpur"], ["Asia/Riyadh", "Riyadh"], ["Africa/Cairo", "Kairo"], ["UTC", "UTC"]];
+const IMP = { transactions: null, tasks: null }; let RESTORE = null;
+function pageSettings(host) {
+  const s = S(), perm = typeof Notification === "undefined" ? "unsupported" : Notification.permission;
+  const days = s.lastBackup ? Math.floor((Date.now() - Date.parse(s.lastBackup)) / 864e5) : null; let usage = 0; try { usage = (localStorage.getItem(STORAGE_KEY) || "").length * 2; } catch {}
+  const panel = (t, d, b) => `<section class="card p6"><h2 class="serif" style="font-size:20px">${t}</h2>${d ? `<p class="muted sm" style="margin-top:4px">${d}</p>` : ""}<div style="margin-top:20px">${b}</div></section>`;
+  host.innerHTML = pageHead("Pengaturan", "Identitas, tampilan, dan data. Perubahan disimpan di perangkat ini.") + `<div class="stack-lg">
+  ${panel("Profil & tampilan", "", `<div class="fgrid"><div><label class="lbl" for="st-name">Nama panggilan</label><input id="st-name" class="input" value="${esc(s.name)}"></div><div><label class="lbl" for="st-tag">Tagline</label><input id="st-tag" class="input" value="${esc(s.tagline)}"></div><div class="full"><span class="lbl">Foto latar landing page</span><div class="row wrap"><label class="btn btn-ghost btn-sm" style="cursor:pointer">${ic("ul")} Unggah foto<input type="file" accept="image/*" class="hidden" data-chg="hero-file"></label><button class="btn btn-ghost btn-sm" data-act="hero-clear">Pakai ilustrasi bawaan</button><span id="hero-msg" class="xs muted"></span></div></div><div class="full"><label class="lbl" for="st-hero">Atau tempel URL gambar (opsional)</label><input id="st-hero" class="input" placeholder="https://… (kosongkan untuk ilustrasi bawaan)" value="${esc(s.heroImage)}"></div>
+  <div><label class="lbl" for="st-tz">Zona waktu</label><select id="st-tz" class="input" data-chg="set-tz">${optsHTML(ZONES.map(([value, label]) => ({ value, label })), s.timezone)}</select></div><div><label class="lbl" for="st-ws">Awal minggu</label><select id="st-ws" class="input" data-chg="set-ws">${optsHTML([{ value: "1", label: "Senin" }, { value: "0", label: "Minggu" }], String(s.weekStart))}</select></div><div><span class="lbl">Mata uang utama</span><p class="input" style="opacity:.7">Rupiah (IDR)</p></div></div>
+  <div style="margin-top:20px"><span class="lbl">Tema</span><div class="row wrap" style="gap:12px" id="themes">${[["light", "Ivory", "#faf6ee"], ["sage", "Sage", "#ecf1e6"], ["dark", "Charcoal", "#161614"]].map(([k, l, c]) => `<button class="btn btn-ghost" data-act="set-theme" data-k="${k}" style="${s.theme === k ? "border-color:rgb(var(--accent));background:rgb(var(--accent)/.06)" : ""}"><i style="width:22px;height:22px;border-radius:50%;border:1px solid rgb(var(--line));background:${c};display:inline-block"></i>${l}</button>`).join("")}</div></div>
+  <div class="row" style="margin-top:24px;gap:12px"><button class="btn btn-primary" data-act="save-profile">Simpan profil</button><span id="prof-msg" class="sm" role="status"></span></div>`)}
+  ${panel("Pengingat", "Pengingat acara dan tugas muncul sebagai notifikasi browser selama HAVEN terbuka (tidak ada server yang mengirim notifikasi saat tab ditutup).", perm === "unsupported" ? `<p class="muted sm">Browser ini tidak mendukung notifikasi.</p>` : perm === "granted" ? `<p class="sage sm">Notifikasi aktif.</p>` : perm === "denied" ? `<p class="terra sm">Notifikasi diblokir. Aktifkan lewat pengaturan situs di browser.</p>` : `<button class="btn btn-primary" data-act="notif">Aktifkan notifikasi</button>`)}
+  ${panel("Data & backup", "HAVEN tidak memakai server. Datamu hanya ada di browser ini — jika cache/data situs dihapus atau ganti perangkat, data hilang kecuali ada backup.", `<div class="${days === null || days > 7 ? "warn" : "ok"}" style="margin-bottom:20px">${days === null ? "Kamu belum pernah membuat backup. Lakukan sekarang." : days === 0 ? "Backup terakhir: hari ini." : `Backup terakhir ${days} hari lalu${days > 7 ? " — saatnya backup lagi." : "."}`}</div>
+  <div class="grid g2" style="gap:12px"><button class="btn btn-primary" style="justify-content:flex-start" data-act="backup">${ic("dl")} Unduh backup lengkap (JSON)</button><label class="btn btn-ghost" style="justify-content:flex-start;cursor:pointer">${ic("ul")} Pulihkan dari backup<input type="file" accept="application/json,.json" class="hidden" data-chg="restore-file"></label><button class="btn btn-ghost" style="justify-content:flex-start" data-act="exp-tx">${ic("dl")} Ekspor transaksi (CSV)</button><button class="btn btn-ghost" style="justify-content:flex-start" data-act="exp-tasks">${ic("dl")} Ekspor tugas (CSV)</button></div><div id="data-msg" style="margin-top:12px"></div><div id="restore-box"></div>
+  <div class="stack-lg" style="margin-top:24px">${["transactions", "tasks"].map((k) => `<div class="card p4" style="box-shadow:none"><div class="row between wrap"><b class="sm">Impor ${k === "transactions" ? "transaksi" : "tugas"} (CSV)</b><div class="row"><button class="btn btn-ghost btn-sm" data-act="tpl" data-k="${k}">Unduh templat</button><label class="btn btn-ghost btn-sm" style="cursor:pointer">${ic("ul")} Pilih berkas<input type="file" accept=".csv,text/csv" class="hidden" data-chg="imp-file" data-k="${k}"></label></div></div><div id="imp-${k}"></div></div>`).join("")}</div>
+  <div class="row between wrap" style="margin-top:24px;padding-top:20px;border-top:1px solid rgb(var(--line))"><span class="sm muted">Penyimpanan terpakai: ${(usage / 1024).toFixed(1)} KB dari ± 5.000 KB</span><button class="btn" style="background:rgb(var(--terra)/.1);color:rgb(var(--terra))" data-act="reset">Hapus semua data</button></div>`)}</div>`;
+  App.page = { refresh: () => {} };
+}
+ACT["save-profile"] = () => { const ok = Store.settings({ name: $("#st-name").value.trim() || "Pengguna", tagline: $("#st-tag").value.trim(), heroImage: $("#st-hero").value.trim() === "(foto diunggah)" ? S().heroImage : $("#st-hero").value.trim() }); const m = $("#prof-msg"); m.className = "sm " + (ok ? "sage" : "terra"); m.textContent = ok ? "Tersimpan." : "Gagal menyimpan."; shellRefresh(); };
+ACT["set-theme"] = (el) => { Store.settings({ theme: el.dataset.k }); applyTheme(); $$("#themes .btn").forEach((b) => (b.style.cssText = b.dataset.k === el.dataset.k ? "border-color:rgb(var(--accent));background:rgb(var(--accent)/.06)" : "")); };
+INP["set-tz"] = (t) => Store.settings({ timezone: t.value });
+INP["set-ws"] = (t) => Store.settings({ weekStart: Number(t.value) });
+ACT.notif = async () => { await Notification.requestPermission(); pageSettings($("#view")); };
+ACT.backup = () => { downloadFile(`haven-backup-${TODAY()}.json`, JSON.stringify({ ...Store.db, exportedAt: nowISO() }, null, 2), "application/json"); Store.settings({ lastBackup: nowISO() }); $("#data-msg").innerHTML = `<p class="ok" role="status">Backup diunduh. Simpan berkas ini di tempat aman (Drive, flashdisk).</p>`; };
+ACT["exp-tx"] = () => downloadFile("haven-transaksi.csv", exportTransactions(), "text/csv");
+ACT["exp-tasks"] = () => downloadFile("haven-tugas.csv", exportTasks(), "text/csv");
+INP["restore-file"] = async (t) => {
+  const f = t.files[0]; t.value = ""; const box = $("#restore-box"); box.innerHTML = ""; if (!f) return;
+  try { const p = normalizeDB(JSON.parse(await f.text())); if (!p) throw 0; RESTORE = p; const counts = Object.entries(p.data).filter(([, v]) => v.length).map(([k, v]) => `${k}: ${v.length}`).join(" · ") || "Backup kosong"; box.innerHTML = `<div class="card p4" style="box-shadow:none;margin-top:16px"><b class="sm">Pratinjau backup</b><p class="muted sm" style="margin-top:4px">${esc(counts)}</p><p class="terra sm" style="margin-top:8px">Memulihkan akan MENGGANTI seluruh data saat ini.</p><div class="row" style="margin-top:12px"><button class="btn btn-danger" data-act="restore-go">Ganti dengan backup ini</button><button class="btn btn-ghost" data-act="restore-cancel">Batal</button></div></div>`; }
+  catch { box.innerHTML = `<p class="err" role="alert" style="margin-top:12px">Berkas bukan backup HAVEN yang valid. Tidak ada yang diubah.</p>`; }
+};
+ACT["restore-go"] = () => { const ok = Store.replaceAll(RESTORE); RESTORE = null; applyTheme(); pageSettings($("#view")); $("#data-msg").innerHTML = ok ? `<p class="ok">Data berhasil dipulihkan.</p>` : `<p class="err">Gagal memulihkan; data lama tidak berubah.</p>`; };
+ACT["restore-cancel"] = () => { RESTORE = null; $("#restore-box").innerHTML = ""; };
+ACT.tpl = (el) => { const k = el.dataset.k; downloadFile(`template-${k}.csv`, k === "transactions" ? "date,type,amount,account,toAccount,category,description,method,scope,note\n2026-10-25,expense,25000,Dompet,,Makanan,Makan siang,cash,personal,\n" : "title,description,status,priority,area,startDate,dueDate,estimate,category,notes\nMakalah ushul fikih,,todo,high,academic,,2026-11-01,120,Makalah,\n", "text/csv"); };
+INP["imp-file"] = async (t) => {
+  const f = t.files[0], k = t.dataset.k; t.value = ""; if (!f) return; const text = await f.text(); const r = k === "transactions" ? importTransactions(text) : importTasks(text); IMP[k] = r;
+  const cols = k === "transactions" ? ["date", "type", "amount", "description"] : ["title", "status", "priority", "dueDate"];
+  $("#imp-" + k).innerHTML = `<div class="stack" style="margin-top:16px"><p class="sm"><b class="sage">${r.valid.length} baris valid</b> · <b class="${r.errors.length ? "terra" : "muted"}">${r.errors.length} baris gagal</b>${r.warnings.length ? ` · <span class="amber">${r.warnings.length} peringatan</span>` : ""}</p>
+  ${r.valid.length ? `<div style="max-height:200px;overflow:auto;border:1px solid rgb(var(--line));border-radius:12px"><table class="t xs"><thead><tr>${cols.map((c) => `<th>${c}</th>`).join("")}</tr></thead><tbody>${r.valid.slice(0, 8).map((x) => `<tr>${cols.map((c) => `<td>${esc(x[c])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>` : ""}
+  ${r.errors.length ? `<ul class="err xs" style="max-height:160px;overflow:auto;list-style:none;padding:12px">${r.errors.map((e) => `<li>Baris ${e.row}: ${esc(e.message)}</li>`).join("")}</ul>` : ""}${r.warnings.length ? `<ul class="warn xs" style="max-height:110px;overflow:auto;list-style:none;padding:12px">${r.warnings.map((e) => `<li>Baris ${e.row}: ${esc(e.message)}</li>`).join("")}</ul>` : ""}
+  <div class="row"><button class="btn btn-accent" ${r.valid.length ? "" : "disabled"} data-act="imp-go" data-k="${k}">Impor ${r.valid.length} baris valid</button><button class="btn btn-ghost" data-act="imp-cancel" data-k="${k}">Batal</button></div><p class="xs muted">Baris yang gagal tidak diimpor. Perbaiki di CSV lalu impor ulang bagian tersebut.</p></div>`;
+};
+ACT["imp-go"] = (el) => { const k = el.dataset.k, r = IMP[k]; const ok = Store.addMany(k, r.valid); $("#imp-" + k).innerHTML = `<p class="${ok ? "ok" : "err"}" style="margin-top:12px" role="status">${ok ? r.valid.length + " baris berhasil diimpor." : "Gagal menyimpan; tidak ada data yang diimpor."}</p>`; IMP[k] = null; };
+ACT["imp-cancel"] = (el) => { IMP[el.dataset.k] = null; $("#imp-" + el.dataset.k).innerHTML = ""; };
+ACT.reset = () => confirmBox({ title: "Hapus semua data?", text: "Seluruh tugas, keuangan, catatan, dan pengaturan akan dihapus dari browser ini. Pastikan sudah backup. Ketik <b>HAPUS</b> untuk melanjutkan.", okLabel: "Hapus permanen", input: "HAPUS", onOk: () => { Store.reset(); applyTheme(); pageSettings($("#view")); toast("Semua data dihapus"); } });
+
+INP["hero-file"] = (t) => {
+  const f = t.files[0]; t.value = ""; if (!f) return; const m = $("#hero-msg"); const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = () => { const k = Math.min(1, 1800 / img.width), c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); const data = c.toDataURL("image/jpeg", 0.8); const ok = Store.settings({ heroImage: data }); m.textContent = ok ? "Foto tersimpan. Lihat di halaman depan." : "Foto terlalu besar untuk disimpan."; $("#st-hero").value = ok ? "(foto diunggah)" : ""; };
+  img.onerror = () => { m.textContent = "Berkas bukan gambar yang valid."; };
+  img.src = url;
+};
+ACT["hero-clear"] = () => { Store.settings({ heroImage: "" }); $("#st-hero").value = ""; $("#hero-msg").textContent = "Memakai ilustrasi bawaan."; };
+/* ============================ HAVEN shell, landing, router ============================ */
+const NAV = [
+  ["dashboard", "Beranda", "home"], ["tasks", "Tugas", "check"], ["calendar", "Kalender", "calendar"], ["projects", "Proyek", "folder"],
+  ["academic", "Akademik", "book"], ["work", "Pekerjaan", "briefcase"], ["organization", "Organisasi", "users"], ["finance", "Keuangan", "wallet"],
+  ["goals", "Tujuan", "target"], ["notes", "Catatan", "note"], ["habits", "Kebiasaan", "repeat"], ["documents", "Dokumen", "file"],
+  ["analytics", "Analitik", "chart"], ["search", "Pencarian", "search"], ["settings", "Pengaturan", "settings"],
+];
+const PAGES = {
+  dashboard: pageDashboard, calendar: pageCalendar, finance: pageFinance, habits: pageHabits, analytics: pageAnalytics, search: pageSearch, settings: pageSettings,
+};
+const isMobile = () => matchMedia("(max-width:1000px)").matches;
+
+function applyTheme() { document.documentElement.dataset.theme = S().theme || "light"; }
+function shellRefresh() { const g = $("#greet-name"); if (g) g.textContent = S().name; }
+
+/* ------------------------------ landing ------------------------------ */
+function rng(seed) { let s = seed; return () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646; }
+function landscapeSVG() {
+  const r = rng(7), W = 1600, H = 1000;
+  const layer = (sp, inner, extra = "") => `<svg class="layer" data-speed="${sp}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice" aria-hidden="true" ${extra}>${inner}</svg>`;
+  const ridge = (base, amp, seed, fill, step = 100) => { const q = rng(seed); let d = `M-50 ${H} L-50 ${base}`; for (let x = 0; x <= W + 50; x += step) d += ` L${x} ${(base - q() * amp).toFixed(0)}`; return `<path d="${d} L${W + 50} ${H} Z" fill="${fill}"/>`; };
+  const tree = (x, y, s, c1, c2) => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-4" y="0" width="8" height="40" fill="#4a3426"/><ellipse cx="0" cy="-20" rx="46" ry="52" fill="${c1}"/><ellipse cx="-14" cy="-30" rx="26" ry="30" fill="${c2}" opacity=".7"/></g>`;
+  const defs = `<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfd0dc"/><stop offset=".45" stop-color="#e6d4d6"/><stop offset=".7" stop-color="#f4cdb6"/><stop offset="1" stop-color="#f7bf98"/></linearGradient>
+  <linearGradient id="cliff" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b9aab8"/><stop offset=".55" stop-color="#cdbfcb"/><stop offset="1" stop-color="#8e7f93"/></linearGradient>
+  <linearGradient id="goldslope" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9a441"/><stop offset=".6" stop-color="#b8892e"/><stop offset="1" stop-color="#7e8a3a"/></linearGradient>
+  <linearGradient id="rslope" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f7a45"/><stop offset="1" stop-color="#7e9a4a"/></linearGradient>
+  <filter id="b2"><feGaussianBlur stdDeviation="2"/></filter><filter id="b6"><feGaussianBlur stdDeviation="7"/></filter><filter id="b14"><feGaussianBlur stdDeviation="16"/></filter></defs>`;
+  // langit + haze
+  const sky = `${defs}<rect width="${W}" height="${H}" fill="url(#sky)"/><ellipse cx="800" cy="640" rx="520" ry="150" fill="#fbd9bd" opacity=".7" filter="url(#b14)"/>`;
+  // gunung jauh
+  const far = ridge(660, 90, 3, "#b9a8b8", 120) + ridge(700, 70, 9, "#a99ab0", 90) + `<path d="M900 720 L1110 560 L1180 590 L1250 540 L1420 640 L1650 580 L1650 760 Z" fill="#9c8cab" opacity=".85"/>`;
+  // tebing kiri besar
+  const cliff = `<path d="M-60 760 L-60 380 L40 330 L120 280 L190 250 L250 262 L300 330 L340 420 L400 520 L470 640 L560 740 Z" fill="url(#cliff)"/><path d="M190 250 L250 262 L300 330 L340 420 L400 520 L470 640 L400 640 L330 500 L260 380 Z" fill="#7d6f86" opacity=".55"/><path d="M60 360 L150 330 L190 400 L120 470 Z M120 520 L200 470 L260 560 L170 620 Z" fill="#e2d6de" opacity=".5"/>`;
+  const leftHill = `<path d="M-60 1000 L-60 560 C120 600 260 700 420 790 C560 860 700 900 860 930 L860 1000 Z" fill="url(#goldslope)"/><path d="M-60 780 C150 760 330 840 560 900 L560 1000 L-60 1000 Z" fill="#c79a38" opacity=".7"/>`;
+  const house = `<g transform="translate(160 700)"><path d="M0 40 L112 40 L112 120 L0 120 Z" fill="#e9dfd6"/><path d="M-10 42 L50 0 L124 38 L112 48 L50 14 L0 52 Z" fill="#3b2d36"/><rect x="12" y="62" width="26" height="22" fill="#a89aa3"/><rect x="0" y="108" width="112" height="14" fill="#cdbfb2" opacity=".7"/></g>`;
+  const rightHill = `<path d="M1660 1000 L1660 540 C1480 600 1300 700 1120 790 C980 860 860 910 760 940 L760 1000 Z" fill="url(#rslope)"/><path d="M1660 560 L1660 700 C1520 700 1380 760 1260 820 C1380 700 1500 610 1660 560 Z" fill="#6f6a5f" opacity=".5"/>${[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => `<ellipse cx="${1220 + r() * 360}" cy="${700 + r() * 80}" rx="${12 + r() * 22}" ry="${6 + r() * 8}" fill="#d9d4cc" opacity=".6"/>`).join("")}`;
+  const mid = ridge(850, 40, 21, "#8da34e", 140);
+  const trees = tree(520, 760, 1.0, "#8a4a2c", "#b3652f") + tree(560, 790, .7, "#7a3f26", "#a35a2c") + tree(1090, 700, 1.5, "#8c4a22", "#c07a38") + tree(960, 780, .6, "#8f5a3a", "#b97a45");
+  // rerumputan + bunga fokus
+  const grass = (n, y0, y1, cols) => { let s = ""; for (let i = 0; i < n; i++) { const x = r() * W, y = y0 + r() * (y1 - y0), h = 18 + (y - y0) * 0.35, lean = r() * 14 - 7; s += `<path d="M${x.toFixed(0)} ${y.toFixed(0)} q${(lean / 2).toFixed(0)} ${-h / 2} ${lean.toFixed(0)} ${-h.toFixed(0)}" stroke="${cols[Math.floor(r() * cols.length)]}" stroke-width="${1.2 + (y - y0) / 120}" fill="none" stroke-linecap="round"/>`; } return s; };
+  const blooms = (n, y0, y1, pal, minR, maxR, blur) => { let s = ""; for (let i = 0; i < n; i++) { const x = r() * W, y = y0 + r() * (y1 - y0), rr = minR + (y - y0) / (y1 - y0) * (maxR - minR) * (0.5 + r() * 0.7), c = pal[Math.floor(r() * pal.length)]; s += `<g transform="translate(${x.toFixed(0)} ${y.toFixed(0)})"><line x1="0" y1="0" x2="${(r() * 8 - 4).toFixed(0)}" y2="${(rr * 3.2).toFixed(0)}" stroke="#3f5f2e" stroke-width="${Math.max(1, rr / 5).toFixed(1)}"/><circle r="${rr.toFixed(1)}" fill="${c}"/><circle r="${(rr * 0.35).toFixed(1)}" fill="#fff3c9" opacity=".7"/></g>`; } return `<g ${blur ? `filter="url(#${blur})"` : ""}>${s}</g>`; };
+  const pal = ["#e8602a", "#f07a2e", "#7a67c4", "#9b86d6", "#ffffff", "#f1ecf7", "#e8602a", "#b49be0"];
+  const f1 = `<rect y="880" width="${W}" height="140" fill="#4e6b32"/>` + grass(260, 880, 1000, ["#3f5f2e", "#5f8140", "#8aa24d", "#2f4a25"]) + blooms(90, 880, 960, pal, 3, 7, "") ;
+  const f2 = blooms(70, 930, 1010, pal, 8, 16, "b2") + grass(120, 940, 1010, ["#2f4a25", "#456b2e"]);
+  const f3 = blooms(18, 960, 1040, ["#ffffff", "#f1ecf7", "#9b86d6", "#e8602a"], 24, 46, "b6");
+  return layer(0.03, sky) + layer(0.08, far) + layer(0.14, cliff + leftHill + house + rightHill + mid + trees) + layer(0.24, f1) + layer(0.36, f2) + layer(0.5, f3);
+}
+function landing() {
+  const s = S(), hasImg = !!s.heroImage;
+  $("#root").innerHTML = `<div id="land"><section class="hero lt">${hasImg ? `<img src="${esc(s.heroImage)}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" data-speed="0.08" class="layer">` : landscapeSVG()}
+  <nav class="lnav" aria-label="Navigasi"><a href="#/" class="row" style="gap:8px;font-weight:600;font-size:16px"><span style="color:#e8602a;display:inline-flex">${ic("target")}</span>Haven</a><div class="lk"><a href="#/" >Home</a><a href="#fitur" data-act="goto" data-t="fitur">Fitur</a><a href="#filosofi" data-act="goto" data-t="filosofi">Filosofi</a><a href="#/settings">Data</a></div><a class="go" href="#/dashboard">Masuk</a></nav>
+  <div class="htext"><span class="lbadge">Your life, thoughtfully organized ✨</span><h1>Organize<br class="mb"> with ease.</h1><p class="lsub">Kuliah, pekerjaan, organisasi, dan keuangan dalam satu tempat yang tenang.<br>Supaya kamu bisa menarik napas.</p><div class="row wrap" style="justify-content:center;gap:22px"><a class="btnw" href="#/dashboard">Enter Your Haven ${ic("arrow")}</a><a class="lghost" href="#fitur" data-act="goto" data-t="fitur">Explore the Experience</a></div></div>
+  <div class="scrollh">SCROLL ${ic("down")}</div></section>
+  <section class="sect" id="fitur"><div class="rev" style="text-align:center;margin-bottom:48px"><p class="xs muted" style="letter-spacing:.2em;text-transform:uppercase">Fitur</p><h2 class="lh2">Semua hal pentingmu, tertata</h2></div><div class="grid g3">${[
+    ["check", "Tugas & Proyek", "List, kanban, dan preset My Day, Upcoming, Overdue."], ["calendar", "Kalender", "Harian, mingguan, bulanan, dan agenda dengan blok waktu nyata."], ["book", "Akademik", "Semester, mata kuliah, tugas, ujian."],
+    ["wallet", "Keuangan", "Akun, transaksi, anggaran, tabungan, dan analitik — rupiah tepat."], ["users", "Organisasi", "Program kerja, rapat, anggaran organisasi."], ["repeat", "Kebiasaan", "Konsistensi tanpa streak yang menghukum."],
+  ].map(([i, t, d], n) => `<div class="card fcard rev" style="transition-delay:${n * 70}ms"><span class="fic">${ic(i)}</span><h3 style="font-size:18px;font-weight:600">${t}</h3><p class="muted sm" style="margin-top:6px">${d}</p></div>`).join("")}</div></section>
+  <section class="sect" id="filosofi" style="padding-top:20px"><div class="card rev" style="padding:56px 28px;text-align:center"><h2 class="lh2">Tenang, bukan sibuk</h2><p class="muted" style="max-width:36rem;margin:16px auto 0">HAVEN dibuat agar kamu melihat apa yang penting hari ini, tanpa kebisingan. Datamu tersimpan di browser ini — tanpa server, tanpa akun. Jangan lupa buat backup berkala.</p><a class="btn btn-primary" style="margin-top:28px" href="#/dashboard">Enter Your Haven</a></div></section>
+  <footer class="sm muted" style="text-align:center;padding:0 0 48px">HAVEN · Your life, thoughtfully organized.</footer></div>`;
+  const layers = $$(".hero .layer"), txt = $(".htext"), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const onScroll = () => { if (reduce) return; const y = scrollY; if (y > 1400) return; layers.forEach((l) => (l.style.transform = `translateY(${y * Number(l.dataset.speed)}px)`)); txt.style.transform = `translateY(${y * 0.25}px)`; txt.style.opacity = String(Math.max(0, 1 - y / 600)); };
+  window.onscroll = onScroll; onScroll();
+  const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && (e.target.classList.add("in"), io.unobserve(e.target))), { threshold: 0.15 });
+  $$(".rev").forEach((el) => io.observe(el));
+}
+ACT.goto = (el, e) => { e && e.preventDefault(); const t = document.getElementById(el.dataset.t); t && t.scrollIntoView({ behavior: "smooth" }); };
+
+/* ------------------------------ shell ------------------------------ */
+function greeting() { const h = Number(new Date().toLocaleTimeString("en-GB", { hour: "2-digit", hour12: false, timeZone: S().timezone }).slice(0, 2)); return h < 11 ? "Selamat pagi" : h < 15 ? "Selamat siang" : h < 18 ? "Selamat sore" : "Selamat malam"; }
+function buildShell() {
+  $("#root").innerHTML = `<aside id="side" aria-label="Menu utama"><div class="row" style="padding:20px 18px;gap:10px"><a href="#/" class="serif brand-t" style="font-size:22px;letter-spacing:.05em;flex:1">HAVEN</a><button class="icon-btn" data-act="collapse" aria-label="Ciutkan menu">${ic("menu")}</button></div>
+  <nav style="flex:1;overflow:auto;padding:0 12px" class="stack xs">${NAV.map(([k, l, i]) => `<a class="navlink" data-nav="${k}" href="#/${k}" title="${l}">${ic(i)}<span class="lbl-n">${l}</span></a>`).join("")}</nav>
+  <div class="xs muted lbl-n" style="padding:16px 20px"><span id="savestat"></span></div></aside><div id="scrim" data-act="drawer"></div>
+  <div id="main"><header id="top"><button id="menu-btn" class="icon-btn" data-act="drawer" aria-label="Menu">${ic("menu")}</button><button class="searchbtn" data-act="palette">${ic("search")}<span class="grow">Cari atau lompat ke…</span><kbd class="tiny muted">Ctrl K</kbd></button></header><main id="view"></main></div>
+  <button id="fab" data-act="capture" aria-label="Quick Capture">${ic("plus")}</button>`;
+  Store.statusCb = (st) => { const el = $("#savestat"); if (!el) return; el.textContent = st.state === "saved" ? "✓ Tersimpan di perangkat" : st.state === "error" ? "⚠ Gagal menyimpan" : ""; el.style.color = st.state === "error" ? "rgb(var(--terra))" : ""; };
+}
+ACT.drawer = () => document.body.classList.toggle("drawer");
+ACT.collapse = () => document.body.classList.toggle("collapsed");
+
+/* ------------------------------ quick capture ------------------------------ */
+const CAPTURE = [["tasks", "Tugas baru", "check"], ["events", "Acara baru", "calendar"], ["transactions", "Transaksi", "wallet"], ["projects", "Proyek baru", "folder"], ["notes", "Catatan baru", "note"], ["goals", "Tujuan baru", "target"], ["expense", "Pengeluaran cepat", "receipt"]];
+ACT.capture = () => {
+  const ov = openModal({ title: "Quick Capture", body: `<div class="grid g2" style="gap:10px">${CAPTURE.map(([k, l, i]) => `<button class="card row" style="padding:14px;gap:12px;box-shadow:none;text-align:left" data-act="cap" data-k="${k}"><span class="fic" style="margin:0">${ic(i)}</span>${l}</button>`).join("")}</div>` });
+  ov._cap = true;
+};
+ACT.cap = (el) => { closeModal(); const k = el.dataset.k; setTimeout(() => (k === "expense" ? openForm("transactions", { initial: { type: "expense", date: TODAY() } }) : openForm(k)), 30); };
+
+/* ------------------------------ command palette ------------------------------ */
+let PAL = { q: "", i: 0, items: [] };
+function palItems(q) {
+  const out = [];
+  NAV.forEach(([k, l]) => out.push({ g: "Halaman", t: l, run: () => (location.hash = "#/" + k) }));
+  CAPTURE.forEach(([k, l]) => out.push({ g: "Buat baru", t: l, run: () => ACT.cap({ dataset: { k } }) }));
+  out.push({ g: "Tampilan", t: "Ganti tema: Ivory", run: () => { Store.settings({ theme: "light" }); applyTheme(); } }, { g: "Tampilan", t: "Ganti tema: Sage", run: () => { Store.settings({ theme: "sage" }); applyTheme(); } }, { g: "Tampilan", t: "Ganti tema: Charcoal", run: () => { Store.settings({ theme: "dark" }); applyTheme(); } });
+  const ql = q.trim().toLowerCase(); let res = ql ? out.filter((x) => x.t.toLowerCase().includes(ql)) : out;
+  if (ql.length >= 2) searchAll(q, "").slice(0, 8).forEach((h) => res.push({ g: "Hasil data", t: h.title, sub: SCHEMA[h.col].label, run: () => (location.hash = "#/" + ROUTE[h.col]) }));
+  return res;
+}
+function openPalette() {
+  if ($("#pal")) return; PAL = { q: "", i: 0, items: [] };
+  const ov = document.createElement("div"); ov.id = "pal"; ov.className = "ov"; ov.style.alignItems = "flex-start"; ov.style.paddingTop = "12vh";
+  ov.innerHTML = `<div class="card" style="width:min(560px,100%);overflow:hidden" role="dialog" aria-label="Command palette"><input id="pal-in" class="input" style="border:0;border-bottom:1px solid rgb(var(--line));border-radius:0;padding:16px 20px" placeholder="Ketik perintah, halaman, atau kata kunci…" autocomplete="off"><div id="pal-list" style="max-height:50vh;overflow:auto;padding:6px"></div></div>`;
+  ov.addEventListener("mousedown", (e) => { if (e.target === ov) closePalette(); });
+  document.body.appendChild(ov); const inp = $("#pal-in"); inp.focus(); palRender();
+  inp.addEventListener("input", () => { PAL.q = inp.value; PAL.i = 0; palRender(); });
+  inp.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown") { PAL.i = Math.min(PAL.items.length - 1, PAL.i + 1); palRender(); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { PAL.i = Math.max(0, PAL.i - 1); palRender(); e.preventDefault(); }
+    else if (e.key === "Enter") { palRun(PAL.i); e.preventDefault(); }
+  });
+}
+function closePalette() { const p = $("#pal"); p && p.remove(); }
+function palRun(i) { const it = PAL.items[i]; if (!it) return; closePalette(); it.run(); }
+function palRender() {
+  PAL.items = palItems(PAL.q); let g = "", h = "";
+  PAL.items.forEach((it, i) => { if (it.g !== g) { g = it.g; h += `<div class="pg">${esc(g)}</div>`; } h += `<button class="pi ${i === PAL.i ? "on" : ""}" data-act="pal-run" data-i="${i}"><span>${esc(it.t)}</span>${it.sub ? `<span class="xs muted">${esc(it.sub)}</span>` : ""}</button>`; });
+  $("#pal-list").innerHTML = h || `<p class="muted sm" style="padding:24px;text-align:center">Tidak ada hasil.</p>`;
+  const on = $("#pal-list .pi.on"); on && on.scrollIntoView({ block: "nearest" });
+}
+ACT["pal-run"] = (el) => palRun(Number(el.dataset.i));
+ACT.palette = openPalette;
+document.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("#pal") ? closePalette() : $("#side") && openPalette(); } });
+
+/* ------------------------------ router ------------------------------ */
+let refreshT = null;
+function route() {
+  const slug = (location.hash.replace(/^#\/?/, "").split("?")[0] || "").trim();
+  document.body.classList.remove("drawer"); closePalette(); window.onscroll = null;
+  if (!slug || slug === "fitur" || slug === "filosofi") { if (!$("#land")) { landing(); scrollTo(0, 0); } return; }
+  if (!PAGES[slug] && !MODULES[slug]) { location.hash = "#/dashboard"; return; }
+  if (!$("#side")) buildShell();
+  $$("#side .navlink").forEach((a) => a.classList.toggle("on", a.dataset.nav === slug));
+  const host = $("#view"); host.style.animation = "none"; void host.offsetWidth; host.style.animation = "";
+  App.page = null; (PAGES[slug] ? PAGES[slug](host) : pageModule(host, slug)); scrollTo(0, 0); document.title = "HAVEN — " + ((NAV.find((n) => n[0] === slug) || [])[1] || "");
+}
+Store.listeners.add(() => { clearTimeout(refreshT); refreshT = setTimeout(() => { if (App.page && App.page.refresh && $("#view") && !$(".ov")) App.page.refresh(); }, 30); });
+window.addEventListener("hashchange", route);
+
+/* ------------------------------ pengingat ------------------------------ */
+const fired = new Set();
+function checkReminders() {
+  if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+  const today = TODAY(), now = minutesNow();
+  Store.list("events").forEach((ev) => { if (ev.allDay || !ev.date || ev.date !== today || ev.reminderMin == null || ev.reminderMin === "" || !ev.startTime) return; const at = mins(ev.startTime) - Number(ev.reminderMin), key = "e" + ev.id + today; if (now >= at && now < mins(ev.startTime) && !fired.has(key)) { fired.add(key); new Notification("HAVEN · " + ev.title, { body: "Mulai " + ev.startTime }); } });
+  Store.list("tasks").forEach((t) => { const key = "t" + t.id + today; if (t.reminder === today && t.status !== "done" && !fired.has(key)) { fired.add(key); new Notification("HAVEN · Pengingat tugas", { body: t.title }); } });
+}
+setInterval(checkReminders, 60000);
+
+/* ------------------------------ boot ------------------------------ */
+function boot() {
+  Store.load(); applyTheme();
+  if (!$("#root")) return;
+  route(); checkReminders();
+  if (Store.status && Store.status.state === "error") toast("Penyimpanan browser tidak tersedia; data tidak akan tersimpan.");
+}
+document.addEventListener("DOMContentLoaded", boot);
+</script></body></html>
